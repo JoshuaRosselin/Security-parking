@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="create-table-audit" author="grupo1">
+        <createTable tableName="audit">
+            <column name="audit_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity" type="varchar(50)"/>
+            <column name="startDate" type="datetime"/>
+            <column name="description" type="varchar(150)"/>
+            <column name="operation" type="varchar(50)"/>
+            <column name="result" type="varchar(50)"/>
+            <column name="request" type="jsonb"/>
+            <column name="response" type="jsonb"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-user" author="grupo1">
+        <createTable tableName="user">
+            <column name="user_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="surname" type="varchar(255)"/>
+            <column name="age" type="int"/>
+            <column name="dpi" type="varchar(50)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="password" type="varchar(255)"/>
+            <column name="status" type="boolean"/>
+            <column name="profile_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-profile" author="grupo1">
+        <createTable tableName="profile">
+            <column name="profile_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(100)"/>
+            <column name="status" type="boolean"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-role" author="grupo1">
+        <createTable tableName="role">
+            <column name="role_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role" type="varchar(150)"/>
+            <column name="description" type="varchar(150)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-detailRolProfile" author="grupo1">
+        <createTable tableName="detailRolProfile">
+            <column name="profile_id" type="bigint"/>
+            <column name="role_id" type="bigint"/>
+        </createTable>
+        <addPrimaryKey columnNames="profile_id, role_id" constraintName="pk_detailRolProfile" tableName="detailRolProfile"/>
+    </changeSet>
+
+    <changeSet id="create-table-parking" author="grupo1">
+        <createTable tableName="parking">
+            <column name="parking_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="address" type="varchar(150)"/>
+            <column name="phone" type="varchar(8)"/>
+            <column name="spaces" type="int"/>
+            <column name="status" type="boolean"/>
+            <column name="user_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-fare" author="grupo1">
+        <createTable tableName="fare">
+            <column name="fare_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(30)"/>
+            <column name="startTime" type="datetime"/>
+            <column name="endTime" type="datetime"/>
+            <column name="price" type="double"/>
+            <column name="status" type="boolean"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-register" author="grupo1">
+        <createTable tableName="register">
+            <column name="register_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="car" type="varchar(50)"/>
+            <column name="plate" type="varchar(6)"/>
+            <column name="status" type="boolean"/>
+            <column name="startDate" type="datetime"/>
+            <column name="endDate" type="datetime"/>
+            <column name="total" type="double"/>
+            <column name="parking_id" type="bigint"/>
+            <column name="fare_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="add-foreign-keys" author="grupo1">
+        <addForeignKeyConstraint baseColumnNames="profile_id"
+                                 baseTableName="user"
+                                 constraintName="fk_user_profile"
+                                 referencedColumnNames="profile_id"
+                                 referencedTableName="profile"/>
+
+        <addForeignKeyConstraint baseColumnNames="role_id"
+                                 baseTableName="detailRolProfile"
+                                 constraintName="fk_detailRolProfile_role"
+                                 referencedColumnNames="role_id"
+                                 referencedTableName="role"/>
+
+        <addForeignKeyConstraint baseColumnNames="profile_id"
+                                 baseTableName="detailRolProfile"
+                                 constraintName="fk_detailRolProfile_profile"
+                                 referencedColumnNames="profile_id"
+                                 referencedTableName="profile"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="parking"
+                                 constraintName="fk_parking_user"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user"/>
+
+        <addForeignKeyConstraint baseColumnNames="parking_id"
+                                 baseTableName="register"
+                                 constraintName="fk_register_parking"
+                                 referencedColumnNames="parking_id"
+                                 referencedTableName="parking"/>
+
+        <addForeignKeyConstraint baseColumnNames="fare_id"
+                                 baseTableName="register"
+                                 constraintName="fk_register_fare"
+                                 referencedColumnNames="fare_id"
+                                 referencedTableName="fare"/>
+    </changeSet>
+
+
+    <changeSet id='insert-roles' author="grupo1">
+        <insert tableName="role">
+            <column name="role" value="ROLE_ADMIN"/>
+            <column name="description" value="acceso completo a todas las funciones y configuraciones"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_USER"/>
+            <column name="description" value="tiene acceso a la visualización, creación y edición de su propio contenido"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_AUDITH"/>
+            <column name="description" value="puede revisar y monitorizar las actividades realizadas dentro del sistema"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-profile" author="grupo1">
+        <insert tableName="profile">
+            <column name="description" value="ADMINISTRADOR"/>
+            <column name="status" value="true"/>
+        </insert>
+    </changeSet>
+    <changeSet id="insert-profile2" author="grupo1">
+        <insert tableName="profile">
+            <column name="description" value="USER"/>
+            <column name="status" value="true"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-user" author="grupo1">
+        <insert tableName="user">
+            <column name="name" value="Paco"/>
+            <column name="surname" value="Perez"/>
+            <column name="age" value="30"/>
+            <column name="dpi" value="1234567890123"/>
+            <column name="email" value="pacoperez@gmail.com"/>
+            <column name="password" value="12345678"/>
+            <column name="status" value="true"/>
+            <column name="profile_id" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-detailRolProfile" author="grupo1">
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="1"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="2"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="3"/>
+        </insert>
+    </changeSet>
+    <changeSet id="insert-detailRolProfile2" author="grupo1">
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="2"/>
+            <column name="role_id" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="rename-table-detailRolProfile" author="grupo1">
+        <renameTable oldTableName="detailRolProfile" newTableName="detail_role_profile"/>
+    </changeSet>
+
+</databaseChangeLog>
