@@ -38,7 +38,7 @@ public class UserService implements IUserService {
     @Override
     public Optional<User> findById(Long id) {
         if (id == null ) {
-            throw new IllegalArgumentException("Id could not be null");
+            throw new IllegalArgumentException("Id is necessary");
         }
         return userRepository.findById(id);
     }
