@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @Service
 public class RoleService implements IRoleService {
 
-    private final Rol rol = new Rol();
     private RoleRepository repository;
 
     @Override
@@ -40,8 +39,15 @@ public class RoleService implements IRoleService {
 
     @Override
     public Rol saveRole(RoleDto role){
-        rol.setRole(role.getRole());
-        rol.setDescription(role.getDescription());
+        Rol rol = new Rol();
+        String roleValue = role.getRole();
+        if (roleValue.contains("ROLE_")) {
+            rol.setRole(role.getRole().toUpperCase());
+            rol.setDescription(role.getDescription());
+        } else {
+            roleValue = "ROLE_" + roleValue;
+            rol.setRole(roleValue);
+        }
         return repository.save(rol);
     }
 
