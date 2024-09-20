@@ -28,4 +28,6 @@ public class RoleService implements IRoleService {
                 .map(role -> new SimpleGrantedAuthority(role.getRole()))
                 .collect(Collectors.toList());
     }
+
+
 }
