@@ -4,7 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
+import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
+import org.grupouno.parking.it4.repository.ProfileRepository;
 import org.grupouno.parking.it4.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ public class UserService implements IUserService {
     final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationCodeService verificationCodeService;
+    private final ProfileRepository profileRepository;
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
 
@@ -74,6 +77,11 @@ public class UserService implements IUserService {
             if (userDto.getAge() > 0) user.setAge(userDto.getAge());
             if (userDto.getDpi() != null) user.setDpi(userDto.getDpi());
             if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
+            if(userDto.getProfileId() > 0 ){
+                Profile profile = profileRepository.findById(userDto.getProfileId())
+                        .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+                user.setIdProfile(profile);
+            }
             userRepository.save(user);
         }
     }
@@ -105,6 +113,11 @@ public class UserService implements IUserService {
         }
         if(userDto.isStatus() ){
             user.setStatus(userDto.isStatus());
+        }
+        if(userDto.getProfileId() > 0 ){
+            Profile profile = profileRepository.findById(userDto.getProfileId())
+                    .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+            user.setIdProfile(profile);
         }
         userRepository.save(user);
     }
