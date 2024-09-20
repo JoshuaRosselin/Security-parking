@@ -164,7 +164,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e){
             response.put(MESSAGE, ERROR);
-            response.put("err", "An error ocurred deliting user " + e.getMessage());
+            response.put("err", "An error ocurred deleting user " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
 

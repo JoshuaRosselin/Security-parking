@@ -1,6 +1,7 @@
 package org.grupouno.parking.it4.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
@@ -38,7 +39,7 @@ public class UserService implements IUserService {
     @Override
     public Optional<User> findById(Long id) {
         if (id == null ) {
-            throw new IllegalArgumentException("Id could not be null");
+            throw new IllegalArgumentException("Id is necessary");
         }
         return userRepository.findById(id);
     }
@@ -48,6 +49,7 @@ public class UserService implements IUserService {
         return userRepository.save(user);
     }
 
+    @Override
     public Page<User> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("email")));
         return userRepository.findAll(pageable);
@@ -65,6 +67,7 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
     public void updateUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
             throw  new EntityNotFoundException (USER_WITH + idUser + DONT_EXIST);
@@ -86,6 +89,7 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
     public void patchUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
             throw new EntityNotFoundException(USER_WITH + idUser + DONT_EXIST);
@@ -122,6 +126,7 @@ public class UserService implements IUserService {
         userRepository.save(user);
     }
 
+    @Override
     public void updatePassword(Long idUser, String pastPassword, String newPassword, String confirmPassword) {
         User user = userRepository.findById(idUser)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -135,17 +140,19 @@ public class UserService implements IUserService {
         userRepository.save(user);
     }
 
+    @Override
     public void changePassword(Long idUser, String newPassword) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
-
+    @Override
     public void saveVerificationCode(User user, String code) {
         verificationCodeService.saveVerificationCode(user.getEmail(), code);
     }
 
+    @Override
     public boolean isVerificationCodeValid(User user, String code) {
         return  verificationCodeService.isVerificationCodeValid(user.getEmail(), code);
     }
