@@ -47,6 +47,7 @@ public class RoleService implements IRoleService {
         } else {
             roleValue = "ROLE_" + roleValue;
             rol.setRole(roleValue);
+            rol.setDescription(role.getDescription());
         }
         return repository.save(rol);
     }
