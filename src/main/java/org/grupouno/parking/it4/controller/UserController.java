@@ -26,7 +26,7 @@ public class UserController {
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @PostMapping("/password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto password) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok("Password changed");
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "AUDITH"})
     @PatchMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> patchUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
@@ -55,7 +55,7 @@ public class UserController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @PatchMapping("")
     public ResponseEntity<Map<String, String>> patchUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
@@ -77,7 +77,7 @@ public class UserController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "AUDITH"})
     @PutMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> updateUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
@@ -92,7 +92,7 @@ public class UserController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @PutMapping("")
     public ResponseEntity<Map<String, String>> updateUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
@@ -109,7 +109,7 @@ public class UserController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "AUDITH"})
     @GetMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> findUsers(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
@@ -132,7 +132,7 @@ public class UserController {
 
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @GetMapping("")
     public ResponseEntity<Map<String, String>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         Map<String, String> response = new HashMap<>();
@@ -151,7 +151,7 @@ public class UserController {
         }
     }
 
-    @RolesAllowed("ROLE_ADMIN")
+    @RolesAllowed("ADMIN")
     @DeleteMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> deleteUserId(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
@@ -170,7 +170,7 @@ public class UserController {
 
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @DeleteMapping("")
     public ResponseEntity<Map<String, String>> deleteUser() {
         Map<String, String> response = new HashMap<>();
