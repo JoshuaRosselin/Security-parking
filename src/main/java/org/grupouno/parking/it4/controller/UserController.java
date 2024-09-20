@@ -1,5 +1,6 @@
 package org.grupouno.parking.it4.controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
@@ -27,7 +28,7 @@ public class UserController {
     private static final String ERROR = "Error";
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PostMapping("/change-password")
+    @PostMapping("/password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto password) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User customUserDetails = (User) authentication.getPrincipal();
@@ -35,8 +36,8 @@ public class UserController {
         return ResponseEntity.ok("Password changed");
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PatchMapping("/patch-user/{idUser}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITH')")
+    @PatchMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> patchUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         try {
@@ -56,7 +57,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PatchMapping("/patch-user")
+    @PatchMapping("")
     public ResponseEntity<Map<String, String>> patchUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -77,8 +78,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PutMapping("/update-user/{idUser}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITH')")
+    @PutMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> updateUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -93,7 +94,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PutMapping("/update-user")
+    @PutMapping("")
     public ResponseEntity<Map<String, String>> updateUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,8 +110,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @GetMapping("/find-user/{idUser}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITH')")
+    @GetMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> findUsers(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -132,8 +133,8 @@ public class UserController {
 
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @GetMapping("/get-users")
+    @RolesAllowed("ROLE_ADMIN")
+    @GetMapping("")
     public ResponseEntity<Map<String, String>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         Map<String, String> response = new HashMap<>();
         try{
@@ -151,8 +152,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @DeleteMapping("/delete-user/{idUser}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITH')")
+    @DeleteMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> deleteUserId(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -171,7 +172,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @DeleteMapping("/delete-user")
+    @DeleteMapping("")
     public ResponseEntity<Map<String, String>> deleteUser() {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

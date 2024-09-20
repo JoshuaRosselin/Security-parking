@@ -23,6 +23,7 @@ import java.util.Optional;
 public class UserService implements IUserService {
     final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationCodeService verificationCodeService;
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
 
@@ -119,6 +120,21 @@ public class UserService implements IUserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public void changePassword(Long idUser, String newPassword) {
+        User user = userRepository.findById(idUser).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+
+    public void saveVerificationCode(User user, String code) {
+        verificationCodeService.saveVerificationCode(user.getEmail(), code);
+    }
+
+    public boolean isVerificationCodeValid(User user, String code) {
+        return  verificationCodeService.isVerificationCodeValid(user.getEmail(), code);
     }
 
 }

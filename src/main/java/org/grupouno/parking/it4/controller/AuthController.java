@@ -1,17 +1,23 @@
 package org.grupouno.parking.it4.controller;
 
+
 import org.grupouno.parking.it4.dto.LoginResponse;
 import org.grupouno.parking.it4.dto.LoginUserDto;
 import org.grupouno.parking.it4.dto.RegisterUserDto;
+import org.grupouno.parking.it4.dto.ResetPasswordDto;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.security.AuthenticationService;
 import org.grupouno.parking.it4.security.JwtService;
+import org.grupouno.parking.it4.service.MailService;
+import org.grupouno.parking.it4.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.grupouno.parking.it4.utils.Validations;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -21,10 +27,37 @@ public class AuthController {
     private final JwtService jwtService;
     private Validations validate = new Validations();
     private final AuthenticationService authenticationService;
+    private final MailService emailService;
+    private final UserService userService;
 
-    public AuthController(JwtService jwtService, AuthenticationService authenticationService) {
+    public AuthController(JwtService jwtService, AuthenticationService authenticationService, MailService emailService, UserService userService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.emailService = emailService;
+        this.userService = userService;
+
+    }
+
+    @PostMapping("/forgot-password/{email}")
+    public ResponseEntity<String> forgotPassword(@PathVariable String email) {
+        Optional<User> user = userService.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email not found");
+        }
+        String verificationCode = validate.generateVerificationCode();
+        userService.saveVerificationCode(user.get(), verificationCode);
+        emailService.sendVerificationCode(email, verificationCode);
+        return ResponseEntity.ok("The email has been sent");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto request) {
+        Optional<User> user = userService.findByEmail(request.getEmail());
+        if (user.isEmpty() || !userService.isVerificationCodeValid(user.get(), request.getVerificationCode())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Code invlid");
+        }
+        userService.changePassword(user.get().getUserId(), request.getNewPassword());
+        return ResponseEntity.ok("Password changed");
     }
 
     @PostMapping("/signup")
