@@ -1,5 +1,6 @@
 package org.grupouno.parking.it4.controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
@@ -10,7 +11,6 @@ import org.grupouno.parking.it4.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +26,8 @@ public class UserController {
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PostMapping("/change-password")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @PostMapping("/password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto password) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User customUserDetails = (User) authentication.getPrincipal();
@@ -35,8 +35,8 @@ public class UserController {
         return ResponseEntity.ok("Password changed");
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PatchMapping("/patch-user/{idUser}")
+    @RolesAllowed({"ADMIN", "AUDITH"})
+    @PatchMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> patchUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         try {
@@ -55,8 +55,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PatchMapping("/patch-user")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @PatchMapping("")
     public ResponseEntity<Map<String, String>> patchUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -77,8 +77,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PutMapping("/update-user/{idUser}")
+    @RolesAllowed({"ADMIN", "AUDITH"})
+    @PutMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> updateUserId(@PathVariable Long idUser, @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -92,8 +92,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @PutMapping("/update-user")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @PutMapping("")
     public ResponseEntity<Map<String, String>> updateUser( @RequestBody UserDto userDto) {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,8 +109,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @GetMapping("/find-user/{idUser}")
+    @RolesAllowed({"ADMIN", "AUDITH"})
+    @GetMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> findUsers(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -132,8 +132,8 @@ public class UserController {
 
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @GetMapping("/get-users")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @GetMapping("")
     public ResponseEntity<Map<String, String>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         Map<String, String> response = new HashMap<>();
         try{
@@ -151,8 +151,8 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @DeleteMapping("/delete-user/{idUser}")
+    @RolesAllowed("ADMIN")
+    @DeleteMapping("/{idUser}")
     public ResponseEntity<Map<String, String>> deleteUserId(@PathVariable Long idUser) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -164,14 +164,14 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e){
             response.put(MESSAGE, ERROR);
-            response.put("err", "An error ocurred deliting user " + e.getMessage());
+            response.put("err", "An error ocurred deleting user " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
 
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'AUDITH')")
-    @DeleteMapping("/delete-user")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @DeleteMapping("")
     public ResponseEntity<Map<String, String>> deleteUser() {
         Map<String, String> response = new HashMap<>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

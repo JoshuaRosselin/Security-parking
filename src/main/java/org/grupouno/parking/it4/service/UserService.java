@@ -1,10 +1,13 @@
 package org.grupouno.parking.it4.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
+import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
+import org.grupouno.parking.it4.repository.ProfileRepository;
 import org.grupouno.parking.it4.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -23,6 +26,8 @@ import java.util.Optional;
 public class UserService implements IUserService {
     final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationCodeService verificationCodeService;
+    private final ProfileRepository profileRepository;
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
 
@@ -34,7 +39,7 @@ public class UserService implements IUserService {
     @Override
     public Optional<User> findById(Long id) {
         if (id == null ) {
-            throw new IllegalArgumentException("Id could not be null");
+            throw new IllegalArgumentException("Id is necessary");
         }
         return userRepository.findById(id);
     }
@@ -44,6 +49,7 @@ public class UserService implements IUserService {
         return userRepository.save(user);
     }
 
+    @Override
     public Page<User> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("email")));
         return userRepository.findAll(pageable);
@@ -61,6 +67,7 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
     public void updateUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
             throw  new EntityNotFoundException (USER_WITH + idUser + DONT_EXIST);
@@ -73,10 +80,16 @@ public class UserService implements IUserService {
             if (userDto.getAge() > 0) user.setAge(userDto.getAge());
             if (userDto.getDpi() != null) user.setDpi(userDto.getDpi());
             if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
+            if(userDto.getProfileId() > 0 ){
+                Profile profile = profileRepository.findById(userDto.getProfileId())
+                        .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+                user.setIdProfile(profile);
+            }
             userRepository.save(user);
         }
     }
 
+    @Override
     public void patchUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
             throw new EntityNotFoundException(USER_WITH + idUser + DONT_EXIST);
@@ -105,9 +118,15 @@ public class UserService implements IUserService {
         if(userDto.isStatus() ){
             user.setStatus(userDto.isStatus());
         }
+        if(userDto.getProfileId() > 0 ){
+            Profile profile = profileRepository.findById(userDto.getProfileId())
+                    .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+            user.setIdProfile(profile);
+        }
         userRepository.save(user);
     }
 
+    @Override
     public void updatePassword(Long idUser, String pastPassword, String newPassword, String confirmPassword) {
         User user = userRepository.findById(idUser)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -119,6 +138,23 @@ public class UserService implements IUserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public void changePassword(Long idUser, String newPassword) {
+        User user = userRepository.findById(idUser).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Override
+    public void saveVerificationCode(User user, String code) {
+        verificationCodeService.saveVerificationCode(user.getEmail(), code);
+    }
+
+    @Override
+    public boolean isVerificationCodeValid(User user, String code) {
+        return  verificationCodeService.isVerificationCodeValid(user.getEmail(), code);
     }
 
 }
