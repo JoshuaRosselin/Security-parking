@@ -3,7 +3,7 @@ package org.grupouno.parking.it4.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,8 +20,11 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(jsr250Enabled = true)
+@EnableMethodSecurity(jsr250Enabled = true)
 public class SecurityConfig {
+    private static final String USER = "USER";
+    private static final String ADMIN = "ADMIN";
+    private static final String AUDITH = "AUDITH";
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     public SecurityConfig(
@@ -40,10 +43,10 @@ public class SecurityConfig {
                         .requestMatchers("/v3/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER", "AUDITH")
-                        .requestMatchers("/details/**").hasAnyRole("ADMIN", "USER", "AUDITH")
-                        .requestMatchers("/profiles/**").hasAnyRole("ADMIN", "USER", "AUDITH")
-                        .requestMatchers("/detailsRoleProfile/**").hasAnyRole("ADMIN", "USER", "AUDITH")
+                        .requestMatchers("/users/**").hasAnyRole(ADMIN, USER, AUDITH)
+                        .requestMatchers("/details/**").hasAnyRole(ADMIN, USER, AUDITH)
+                        .requestMatchers("/profiles/**").hasAnyRole(ADMIN, USER, AUDITH)
+                        .requestMatchers("/detailsRoleProfile/**").hasAnyRole(ADMIN, USER, AUDITH)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
