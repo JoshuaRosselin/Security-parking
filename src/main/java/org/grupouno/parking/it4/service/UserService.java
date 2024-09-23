@@ -1,7 +1,6 @@
 package org.grupouno.parking.it4.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
