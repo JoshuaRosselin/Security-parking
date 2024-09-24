@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -39,25 +40,31 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password/{email}")
-    public ResponseEntity<String> forgotPassword(@PathVariable String email) {
+    public ResponseEntity<Map<String, String>> forgotPassword(@PathVariable String email) {
         Optional<User> user = userService.findByEmail(email);
+        Map<String, String> response = new HashMap<>();
         if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email not found");
+            response.put(MESSAGE, "Email not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         String verificationCode = validate.generateVerificationCode();
         userService.saveVerificationCode(user.get(), verificationCode);
         emailService.sendVerificationCode(email, verificationCode);
-        return ResponseEntity.ok("The email has been sent");
+        response.put(MESSAGE, "Email has been send");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto request) {
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordDto request) {
+        Map<String, String> response = new HashMap<>();
         Optional<User> user = userService.findByEmail(request.getEmail());
         if (user.isEmpty() || !userService.isVerificationCodeValid(user.get(), request.getVerificationCode())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Code invlid");
+            response.put(MESSAGE, "Code invalid");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         userService.changePassword(user.get().getUserId(), request.getNewPassword());
-        return ResponseEntity.ok("Password changed");
+        response.put(MESSAGE, "Password changed");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/signup")
