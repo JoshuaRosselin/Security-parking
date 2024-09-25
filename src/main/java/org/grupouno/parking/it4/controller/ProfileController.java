@@ -17,13 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RequestMapping("/profiles")
 @RestController
 public class ProfileController {
 
     ProfileService profileService;
+    private static final String ERROR = "Error:";
 
     @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
     @GetMapping("")
@@ -83,7 +83,7 @@ public class ProfileController {
             return ResponseEntity.ok("Perfil actualizado correctamente");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + e.getMessage());
+                    .body(ERROR + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al actualizar el perfil: " + e.getMessage());
