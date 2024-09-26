@@ -51,8 +51,8 @@ public class AuthenticationService {
         if (input.getEmail() == null || !input.getEmail().contains("@")) {
             throw new IllegalArgumentException("Email is not valid");
         }
-        String passwordNew = validations.generatePassword();
-        Boolean isValid = validations.isValidPassword(passwordNew);
+        String passwordUser = validations.generatePassword();
+        Boolean isValid = validations.isValidPassword(passwordUser);
         if (Boolean.FALSE.equals(isValid)) {
             throw new IllegalArgumentException("The password is invalid");
         }
@@ -67,12 +67,12 @@ public class AuthenticationService {
         user.setAge(input.getAge());
         user.setDpi(input.getDpi());
         user.setEmail(input.getEmail());
-        user.setPassword(passwordEncoder.encode(passwordNew));
+        user.setPassword(passwordEncoder.encode(passwordUser));
         user.setStatus(true);
         Profile profile = profileRepository.findById(2L)
                 .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
         user.setIdProfile(profile);
-        mailService.sendPasswordAndUser(input.getEmail(), input.getPassword());
+        mailService.sendPasswordAndUser(input.getEmail(), passwordUser);
         return userRepository.save(user);
 
     }

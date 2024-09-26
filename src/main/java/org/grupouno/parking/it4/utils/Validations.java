@@ -23,7 +23,7 @@ public class Validations {
     }
 
 
-    public static String generatePassword() {
+    public String generatePassword() {
         //ver que la contraseña tenga minimo un caracter necesario
         StringBuilder password = new StringBuilder();
         password.append(LOWERCASE.charAt(random.nextInt(LOWERCASE.length())));
@@ -38,7 +38,7 @@ public class Validations {
     }
 
     // mezclar los caracteres
-    private static String mezclaCaracteres(String input) {
+    private String mezclaCaracteres(String input) {
         StringBuilder mezcla = new StringBuilder(input.length());
         int[] indices = random.ints(0, input.length()).distinct().limit(input.length()).toArray();
         for (int i : indices) {

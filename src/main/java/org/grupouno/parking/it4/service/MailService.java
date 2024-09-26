@@ -28,7 +28,7 @@ public class MailService {
         message.setTo(email);
         message.setSubject("Your Email parkingIT4");
         message.setText("This are your credentials:\n" +
-                            "your user: " + email "\n your password: " + password);
+                            "your user: " + email + "\n your password: " + password);
         mailSender.send(message);
     }
 
