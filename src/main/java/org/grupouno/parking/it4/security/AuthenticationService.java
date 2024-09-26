@@ -6,6 +6,7 @@ import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.repository.ProfileRepository;
 import org.grupouno.parking.it4.repository.UserRepository;
+import org.grupouno.parking.it4.service.MailService;
 import org.grupouno.parking.it4.service.RoleService;
 import org.grupouno.parking.it4.utils.Validations;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,26 +29,30 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final ProfileRepository profileRepository;
     private Validations validations = new Validations();
+    private final MailService mailService;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             RoleService roleService,
-            ProfileRepository profileRepository
+            ProfileRepository profileRepository,
+            MailService mailService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
         this.profileRepository = profileRepository;
+        this.mailService = mailService;
     }
 
     public User signup(RegisterUserDto input) {
         if (input.getEmail() == null || !input.getEmail().contains("@")) {
             throw new IllegalArgumentException("Email is not valid");
         }
-        Boolean isValid = validations.isValidPassword(input.getPassword());
+        String passwordNew = validations.generatePassword();
+        Boolean isValid = validations.isValidPassword(passwordNew);
         if (Boolean.FALSE.equals(isValid)) {
             throw new IllegalArgumentException("The password is invalid");
         }
@@ -62,12 +67,14 @@ public class AuthenticationService {
         user.setAge(input.getAge());
         user.setDpi(input.getDpi());
         user.setEmail(input.getEmail());
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
+        user.setPassword(passwordEncoder.encode(passwordNew));
         user.setStatus(true);
         Profile profile = profileRepository.findById(2L)
                 .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
         user.setIdProfile(profile);
+        mailService.sendPasswordAndUser(input.getEmail(), input.getPassword());
         return userRepository.save(user);
+
     }
 
     public User authenticate(LoginUserDto input) {

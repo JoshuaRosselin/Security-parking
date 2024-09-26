@@ -23,4 +23,13 @@ public class MailService {
         mailSender.send(message);
     }
 
+    public void sendPasswordAndUser(String email , String password) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your Email parkingIT4");
+        message.setText("This are your credentials:\n" +
+                            "your user: " + email "\n your password: " + password);
+        mailSender.send(message);
+    }
+
 }
