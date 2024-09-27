@@ -2,6 +2,8 @@ package org.grupouno.parking.it4.service;
 
 import org.grupouno.parking.it4.dto.VerificationCodeDto;
 import org.grupouno.parking.it4.exceptions.InvalidVerificationCodeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -12,11 +14,6 @@ import java.util.HashMap;
 @Service
 public class VerificationCodeService {
     private final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
-    private final AudithService audithService; // Inyección del servicio de auditoría
-
-    public VerificationCodeService(AudithService audithService) {
-        this.audithService = audithService;
-    }
 
     public void saveVerificationCode(String email, String code) {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
@@ -31,18 +28,12 @@ public class VerificationCodeService {
     public boolean isVerificationCodeValid(String email, String code) throws InvalidVerificationCodeException {
         VerificationCodeDto verificationCode = verificationCodes.get(email);
         if (verificationCode == null) {
-            auditAction("VerificationCode", "Failed to validate code - Email not found: " + email, "VALIDATE",
-                    Map.of("email", email, "code", code), null, "Failure");
             throw new InvalidVerificationCodeException("Email not Found.");
         }
         if (!verificationCode.getCode().equals(code)) {
-            auditAction("VerificationCode", "Failed to validate code - Incorrect code for email: " + email, "VALIDATE",
-                    Map.of("email", email, "code", code), null, "Failure");
             throw new InvalidVerificationCodeException("The code is incorrect.");
         }
         if (verificationCode.getExpiry().isBefore(LocalDateTime.now())) {
-            auditAction("VerificationCode", "Failed to validate code - Code expired for email: " + email, "VALIDATE",
-                    Map.of("email", email, "code", code), null, "Failure");
             throw new InvalidVerificationCodeException("The code has expired.");
         }
 

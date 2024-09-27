@@ -9,6 +9,8 @@ import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.repository.ProfileRepository;
 import org.grupouno.parking.it4.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +38,7 @@ public class UserService implements IUserService {
 
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -52,6 +55,7 @@ public class UserService implements IUserService {
     @Override
     public Optional<User> findById(Long id) {
         if (id == null ) {
+            logger.error("Id null");
             throw new IllegalArgumentException("Id is necessary");
         }
 
@@ -69,16 +73,7 @@ public class UserService implements IUserService {
 
     @Override
     public User save(User user) {
-        User saveUser = userRepository.save(user);
-
-        // Registro de auditoría
-        auditAction("User", "Saving user", "Create",
-                convertToMap(user),
-                convertToMap(saveUser),
-                "Success");
-        return saveUser;
-
-
+        return userRepository.save(user);
     }
 
     @Override
@@ -97,6 +92,7 @@ public class UserService implements IUserService {
     @Override
     public void delete(Long idUser) {
         if (!userRepository.existsById(idUser)) {
+            logger.error("User not exist id: {}", idUser);
             throw new IllegalArgumentException(USER_WITH + idUser + DONT_EXIST);
         }
         try {
@@ -113,6 +109,7 @@ public class UserService implements IUserService {
     @Override
     public void updateUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
+            logger.error("User not exist id: {}", idUser);
             throw  new EntityNotFoundException (USER_WITH + idUser + DONT_EXIST);
         }
         Optional<User> optionalUser = userRepository.findById(idUser);
@@ -128,6 +125,7 @@ public class UserService implements IUserService {
                         .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
                 user.setIdProfile(profile);
             }
+            logger.info("User {} updated",  userDto.getName());
             userRepository.save(user);
             // Registro de auditoría
             auditAction("User", "Updating user", "Update",
@@ -140,6 +138,7 @@ public class UserService implements IUserService {
     @Override
     public void patchUser(UserDto userDto, Long idUser) {
         if (!userRepository.existsById(idUser)) {
+            logger.error("User not exist with id" );
             throw new EntityNotFoundException(USER_WITH + idUser + DONT_EXIST);
         }
         User user = userRepository.findById(idUser).orElseThrow(() ->
@@ -171,6 +170,7 @@ public class UserService implements IUserService {
                     .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
             user.setIdProfile(profile);
         }
+        logger.info("User {} updated", userDto.getName() );
         userRepository.save(user);
 
         // Registro de auditoría
@@ -185,9 +185,11 @@ public class UserService implements IUserService {
         User user = userRepository.findById(idUser)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if (!passwordEncoder.matches(pastPassword, user.getPassword())) {
+            logger.error("Password incorrect" );
             throw new IllegalArgumentException("Password incorrect");
         }
         if (!newPassword.equals(confirmPassword)) {
+            logger.error("The password not matched" );
             throw new IllegalArgumentException("The new password and confirm password do not match");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -217,6 +219,7 @@ public class UserService implements IUserService {
     @Override
     public void saveVerificationCode(User user, String code) {
         verificationCodeService.saveVerificationCode(user.getEmail(), code);
+        logger.info("the code is {}", code );
     }
 
     @Override

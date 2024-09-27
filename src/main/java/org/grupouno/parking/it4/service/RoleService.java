@@ -8,6 +8,8 @@ import org.grupouno.parking.it4.dto.RoleDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.repository.RoleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,9 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class RoleService implements IRoleService {
 
-    private final RoleRepository repository;
-    private final AudithService audithService;
-    private final ObjectMapper objectMapper;
+    private RoleRepository repository;
 
     @Override
     public List<String> findRolesByProfileId(Long profileId) {
@@ -52,17 +52,14 @@ public class RoleService implements IRoleService {
         if (!roleValue.startsWith("ROLE_")) {
             roleValue = "ROLE_" + roleValue;
         }
-        rol.setRole(roleValue.toUpperCase());
-        rol.setDescription(roleDto.getDescription());
-
-        Rol savedRole = repository.save(rol);
-        auditAction("Role", "Created a new role", "CREATE", convertToMap(savedRole), null, "Success");
-
-        return savedRole;
+        return repository.save(rol);
     }
 
     @Override
-    public void updateRol(RoleDto roleDto, Long idRol) {
+    public void updateRol(RoleDto roleDto, Long idRol){
+        if (!repository.existsById(idRol)) {
+            throw  new EntityNotFoundException("This rol don't exist");
+        }
         Optional<Rol> optionalRol = repository.findById(idRol);
         if (optionalRol.isEmpty()) {
             throw new EntityNotFoundException("This role doesn't exist");
@@ -95,7 +92,7 @@ public class RoleService implements IRoleService {
     @Override
     public void delete(Long idRole) {
         if (!repository.existsById(idRole)) {
-            throw new IllegalArgumentException("This role doesn't exist");
+            throw new IllegalArgumentException("This rol don't exist");
         }
 
         try {
@@ -106,13 +103,13 @@ public class RoleService implements IRoleService {
 
             repository.deleteById(idRole);
         } catch (DataAccessException e) {
-            throw new UserDeletionException("Error deleting role", e);
+            throw new UserDeletionException("Error deleting rol ", e);
         }
     }
 
     @Override
     public Optional<Rol> findRolById(Long idRole) {
-        if (idRole == null) {
+        if (idRole == null ) {
             throw new IllegalArgumentException("Id is necessary");
         }
         Optional<Rol> roleOptional = repository.findById(idRole);
