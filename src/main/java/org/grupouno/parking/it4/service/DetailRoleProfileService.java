@@ -7,6 +7,7 @@ import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.repository.DetailRoleProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 public class DetailRoleProfileService implements IDetailRoleProfileService {
 
     private final DetailRoleProfileRepository repository;
-    private final AudithService audithService; // Inyectar el servicio de auditoría
+    private final AudithService audithService;
 
     @Autowired
     public DetailRoleProfileService(DetailRoleProfileRepository repository, AudithService audithService) {
@@ -26,20 +27,13 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
     }
 
     @Override
+    @Transactional
     public DetailRoleProfile saveDetailRoleProfile(DetailRoleProfile detailRoleProfile) {
-        DetailRoleProfile savedDetail = repository.save(detailRoleProfile);
-
-        // Crear auditoría después de guardar
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Guardado de detalle de rol-perfil",
-                "SAVE",
-                Map.of("profileId", detailRoleProfile.getProfile().getProfileId(), "roleId", detailRoleProfile.getRole().getId()),
-                Map.of("savedDetail", savedDetail),
-                "SUCCESS"
-        );
-
-        return savedDetail;
+        try {
+            return repository.save(detailRoleProfile);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al guardar el detalle del rol y perfil", e);
+        }
     }
 
     @Override
@@ -49,108 +43,70 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
         id.setIdRole(role.getId());
 
         Optional<DetailRoleProfile> detail = repository.findById(id);
-
-        // Crear auditoría después de la consulta
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Consulta de detalle de rol-perfil por ID",
-                "GET",
-                Map.of("profileId", profile.getProfileId(), "roleId", role.getId()),
-                Map.of("foundDetail", detail.orElse(null)),
-                detail.isPresent() ? "SUCCESS" : "NOT_FOUND"
-        );
-
         return detail;
     }
 
     @Override
     public List<DetailRoleProfile> getAllDetailRoleProfiles() {
         List<DetailRoleProfile> details = repository.findAll();
-
-        // Crear auditoría para obtener todos los detalles
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Consulta de todos los detalles de rol-perfil",
-                "GET_ALL",
-                null,
-                Map.of("totalDetails", details.size()),
-                "SUCCESS"
-        );
-
         return details;
     }
 
     @Override
+    @Transactional
     public void deleteDetailRoleProfile(Profile profile, Rol role) {
         DetailDTO id = new DetailDTO();
         id.setIdProfile(profile.getProfileId());
         id.setIdRole(role.getId());
 
         repository.deleteById(id);
-
-        // Crear auditoría después de eliminar
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Eliminación de detalle de rol-perfil",
-                "DELETE",
-                Map.of("profileId", profile.getProfileId(), "roleId", role.getId()),
-                null,
-                "SUCCESS"
-        );
+        logAudit("DELETE", profile, role, Optional.empty());
     }
 
-    // Nuevo método para obtener roles por ID de perfil
+    @Override
     public List<Rol> getRolesByProfileId(long profileId) {
         List<Rol> roles = repository.findByProfile_ProfileId(profileId).stream()
                 .map(DetailRoleProfile::getRole)
                 .collect(Collectors.toList());
-
-        // Crear auditoría para consulta de roles por ID de perfil
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Consulta de roles por ID de perfil",
-                "GET_ROLES_BY_PROFILE",
-                Map.of("profileId", profileId),
-                Map.of("rolesCount", roles.size()),
-                "SUCCESS"
-        );
-
         return roles;
     }
 
-    // Nuevo método para obtener perfiles por ID de rol
+    @Override
     public List<Profile> getProfilesByRoleId(long roleId) {
         List<Profile> profiles = repository.findByRole_Id(roleId).stream()
                 .map(DetailRoleProfile::getProfile)
                 .collect(Collectors.toList());
-
-        // Crear auditoría para consulta de perfiles por ID de rol
-        audithService.createAudit(
-                "DetailRoleProfile",
-                "Consulta de perfiles por ID de rol",
-                "GET_PROFILES_BY_ROLE",
-                Map.of("roleId", roleId),
-                Map.of("profilesCount", profiles.size()),
-                "SUCCESS"
-        );
-
         return profiles;
     }
 
-    // Nuevo método para eliminar roles de un perfil
+    @Override
+    @Transactional
     public void deleteRolesFromProfile(long profileId) {
         List<DetailRoleProfile> details = repository.findByProfile_ProfileId(profileId);
-        for (DetailRoleProfile detail : details) {
-            repository.delete(detail);
+        if (!details.isEmpty()) {
+            details.forEach(repository::delete);
         }
+    }
 
-        // Crear auditoría después de eliminar roles de un perfil
+    private void logAudit(String action, Profile profile, Rol role, Optional<DetailRoleProfile> detail) {
         audithService.createAudit(
                 "DetailRoleProfile",
-                "Eliminación de roles de un perfil",
-                "DELETE_ROLES_FROM_PROFILE",
-                Map.of("profileId", profileId),
-                Map.of("rolesDeleted", details.size()),
+                "Consulta de detalle de rol-perfil por ID",
+                action,
+                Map.of("profileId", profile != null ? profile.getProfileId() : null,
+                        "roleId", role != null ? role.getId() : null),
+                Map.of("foundDetail", detail.orElse(null)),
+                detail.isPresent() ? "SUCCESS" : "NOT_FOUND"
+        );
+    }
+
+    private void logAudit(String action, Long profileId, Long roleId, List<?> items) {
+        audithService.createAudit(
+                "DetailRoleProfile",
+                action + " de detalle de rol-perfil",
+                action,
+                Map.of("profileId", profileId, "roleId", roleId),
+                Map.of("itemsCount", items.size()),
                 "SUCCESS"
         );
     }

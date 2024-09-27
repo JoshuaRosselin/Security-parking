@@ -15,4 +15,8 @@ public interface IDetailRoleProfileService {
     List<DetailRoleProfile> getAllDetailRoleProfiles();
 
     void deleteDetailRoleProfile(Profile profile, Rol role);
+
+    List<Rol> getRolesByProfileId(long profileId); // Agregado
+    List<Profile> getProfilesByRoleId(long roleId); // Agregado
+    void deleteRolesFromProfile(long profileId); // Agregado
 }
