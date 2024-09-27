@@ -31,6 +31,7 @@ public class AuthenticationService {
     private Validations validations = new Validations();
     private final MailService mailService;
 
+
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,

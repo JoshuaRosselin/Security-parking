@@ -24,7 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class RoleService implements IRoleService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
+    ObjectMapper objectMapper;
     private RoleRepository repository;
+    AudithService audithService;
 
     @Override
     public List<String> findRolesByProfileId(Long profileId) {
@@ -45,15 +48,21 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public Rol saveRole(RoleDto roleDto) {
+    public Rol saveRole(RoleDto role){
         Rol rol = new Rol();
-        String roleValue = roleDto.getRole();
-
-        if (!roleValue.startsWith("ROLE_")) {
+        String roleValue = role.getRole();
+        if (roleValue.contains("ROLE_")) {
+            rol.setRole(role.getRole().toUpperCase());
+            rol.setDescription(role.getDescription());
+        } else {
             roleValue = "ROLE_" + roleValue;
+            rol.setRole(roleValue);
+            rol.setDescription(role.getDescription());
         }
+        logger.info("Rol saved {}", rol.getRole() );
         return repository.save(rol);
     }
+
 
     @Override
     public void updateRol(RoleDto roleDto, Long idRol){

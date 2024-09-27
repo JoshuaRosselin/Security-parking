@@ -70,7 +70,7 @@ public class RoleController {
     }
 
     @RolesAllowed({"ADMIN","USER"})
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, String>> deleteRole(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
         try{

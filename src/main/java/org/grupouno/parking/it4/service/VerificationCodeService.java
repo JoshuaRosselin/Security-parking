@@ -15,6 +15,8 @@ import java.util.HashMap;
 public class VerificationCodeService {
     private final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
 
+    AudithService audithService;
+
     public void saveVerificationCode(String email, String code) {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
         VerificationCodeDto verificationCode = new VerificationCodeDto(code, expiry);
