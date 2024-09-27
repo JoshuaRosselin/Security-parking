@@ -24,7 +24,7 @@ public class RoleController {
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
 
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({"ADMIN","USER"})
     @GetMapping("")
     public ResponseEntity<Map<String, String>> getAllRoles() {
         Map<String, String> response = new HashMap<>();
@@ -39,7 +39,7 @@ public class RoleController {
         }
     }
 
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({"ADMIN","USER"})
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, String>> getRolesId(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
@@ -54,8 +54,8 @@ public class RoleController {
         }
     }
 
-    @RolesAllowed({"ADMIN"})
-    @PostMapping("")
+    @RolesAllowed({"ADMIN","USER"})
+    @PostMapping("/saveRol")
     public ResponseEntity<Map<String, String>> addRole(@RequestBody RoleDto role) {
         Map<String, String> response = new HashMap<>();
         try {
@@ -69,8 +69,8 @@ public class RoleController {
         return ResponseEntity.ok(response);
     }
 
-    @RolesAllowed({"ADMIN"})
-    @DeleteMapping("/{id}")
+    @RolesAllowed({"ADMIN","USER"})
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, String>> deleteRole(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
         try{
@@ -85,7 +85,7 @@ public class RoleController {
     }
 
 
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({"ADMIN","USER"})
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateRole(@PathVariable Long id, @RequestBody RoleDto role) {
         Map<String, String> response = new HashMap<>();

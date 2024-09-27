@@ -31,6 +31,7 @@ public class AuthenticationService {
     private Validations validations = new Validations();
     private final MailService mailService;
 
+
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
@@ -86,7 +87,7 @@ public class AuthenticationService {
         );
         User user = (User) authentication.getPrincipal();
         Profile profile = user.getIdProfile();
-        
+
         List<GrantedAuthority> authorities;
         if (profile != null) {
             Long profileId = profile.getProfileId();
@@ -96,10 +97,10 @@ public class AuthenticationService {
         }
         user.setAuthorities(authorities);
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            user,
-            user.getPassword(),
-            authorities
-            );
+                user,
+                user.getPassword(),
+                authorities
+        );
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         return user;

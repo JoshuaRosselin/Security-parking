@@ -3,7 +3,6 @@ package org.grupouno.parking.it4.controller;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-
 import org.grupouno.parking.it4.dto.ProfileDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Profile;
@@ -22,60 +21,54 @@ import java.util.Optional;
 @RestController
 public class ProfileController {
 
-    ProfileService profileService;
+    private final ProfileService profileService;
     private static final String ERROR = "Error:";
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @GetMapping("")
-    public ResponseEntity<Map<String, String>> listProfiles(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> listProfiles(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            Page<Profile> profilePage = profileService.getAllProfiles(page,size);
-            response.put("profile", profilePage.getContent().toString());
-            response.put("totalPages", String.valueOf(profilePage.getTotalPages()));
-            response.put("currentPage", String.valueOf(profilePage.getNumber()));
-            response.put("totalElements", String.valueOf(profilePage.getTotalElements()));
-            return  ResponseEntity.ok(response);
-        }catch(EntityNotFoundException e){
-            return  ResponseEntity.internalServerError().body(response);
+            Page<Profile> profilePage = profileService.getAllProfiles(page, size);
+            response.put("profiles", profilePage.getContent());
+            response.put("totalPages", profilePage.getTotalPages());
+            response.put("currentPage", profilePage.getNumber());
+            response.put("totalElements", profilePage.getTotalElements());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Error fetching profiles"));
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @GetMapping("/{profileId}")
-    public ResponseEntity<Map<String, String>> findProfileById(@PathVariable Long profileId){
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> findProfileById(@PathVariable Long profileId) {
+        Map<String, Object> response = new HashMap<>();
         try {
             Optional<Profile> profile = profileService.findById(profileId);
-            if (profile.isPresent()){
-                response.put("Hola",profile.toString());
+            return profile.map(p -> {
+                response.put("profile", p);
                 return ResponseEntity.ok(response);
-            }else {
-                return ResponseEntity.notFound().build();
-            }
-
-        }catch (IllegalArgumentException e){
-            return  ResponseEntity.badRequest().body(response);
+            }).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @PostMapping("/saveProfile")
     public ResponseEntity<String> saveProfile(@RequestBody Profile profile) {
         try {
             Profile savedProfile = profileService.saveProfile(profile);
-            if (savedProfile != null) {
-                return ResponseEntity.ok("Perfil guardado");
-            } else {
-                return ResponseEntity.badRequest().body("Perfil no guardado");
-            }
+            return ResponseEntity.status(HttpStatus.CREATED).body("Perfil guardado con éxito");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar el perfil: " + e.getMessage());
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
     @PutMapping("/update/{profileId}")
     public ResponseEntity<String> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
         try {
@@ -90,15 +83,15 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
-    @DeleteMapping("/delete/{profileId}")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @DeleteMapping("delete/{profileId}")
     public ResponseEntity<String> deleteProfile(@PathVariable Long profileId) {
         try {
             profileService.deleteProfile(profileId);
             return ResponseEntity.ok("Perfil eliminado correctamente");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + e.getMessage());
+                    .body(ERROR + e.getMessage());
         } catch (UserDeletionException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al eliminar el perfil: " + e.getMessage());
@@ -108,20 +101,21 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_USER", "ROLE_AUDITH"})
-    @PatchMapping("/patchUpdate/{profileId}")
+    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @PatchMapping("patchProfile/{profileId}")
     public ResponseEntity<String> patchProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
         try {
             profileService.patchProfile(profileDto, profileId);
             return ResponseEntity.ok("Perfil actualizado parcialmente");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + e.getMessage());
+                    .body(ERROR + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: Datos de perfil inválidos. " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al actualizar el perfil: " + e.getMessage());
         }
     }
-
 }
-
