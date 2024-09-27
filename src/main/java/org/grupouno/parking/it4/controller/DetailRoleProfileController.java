@@ -79,17 +79,17 @@ public class DetailRoleProfileController {
     @RolesAllowed({"ADMIN", "USER"})
     @PutMapping("/profile/{profileId}/roles")
     public ResponseEntity<Void> updateRolesForProfile(@PathVariable long profileId, @RequestBody List<Long> roleIds) {
-        detailRoleProfileService.deleteRolesFromProfile(profileId); // Primero, elimina roles existentes
+        detailRoleProfileService.deleteRolesFromProfile(profileId);
 
         for (Long roleId : roleIds) {
             Optional<Rol> rolOpt = rolService.findRolById(roleId);
             if (rolOpt.isPresent()) {
                 DetailRoleProfile detailRoleProfile = new DetailRoleProfile();
-                Profile profile = new Profile(); // Crear un objeto Profile
-                profile.setProfileId(profileId); // Asignar el ID existente
-                detailRoleProfile.setProfile(profile); // Establecer el perfil
-                detailRoleProfile.setRole(rolOpt.get()); // Asignar el rol
-                detailRoleProfileService.saveDetailRoleProfile(detailRoleProfile); // Guardar
+                Profile profile = new Profile();
+                profile.setProfileId(profileId);
+                detailRoleProfile.setProfile(profile);
+                detailRoleProfile.setRole(rolOpt.get());
+                detailRoleProfileService.saveDetailRoleProfile(detailRoleProfile);
             } else {
                 return ResponseEntity.badRequest().build();
             }

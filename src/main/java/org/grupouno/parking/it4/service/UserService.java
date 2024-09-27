@@ -30,11 +30,11 @@ import java.util.Optional;
 public class UserService implements IUserService {
     final UserRepository userRepository;
 
-    private final AudithService audithService; // Inyección del servicio de auditoría
+    private final AudithService audithService;
     private final PasswordEncoder passwordEncoder;
     private final VerificationCodeService verificationCodeService;
     private final ProfileRepository profileRepository;
-    private final ObjectMapper objectMapper; // Para convertir a JSON
+    private final ObjectMapper objectMapper;
 
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
@@ -237,7 +237,6 @@ public class UserService implements IUserService {
 
     private void auditAction(String entity, String description, String operation,
                              Map<String, Object> request, Map<String, Object> response, String result) {
-        // Llamar al método de auditoría
         audithService.createAudit(entity, description, operation, request, response, result);
     }
 
