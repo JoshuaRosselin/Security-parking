@@ -44,9 +44,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
                         .requestMatchers("/users/**").hasAnyRole(ADMIN, USER, AUDITH)
-                        .requestMatchers("/details/**").hasAnyRole(ADMIN, USER, AUDITH)
                         .requestMatchers("/profiles/**").hasAnyRole(ADMIN, USER, AUDITH)
                         .requestMatchers("/detailsRoleProfile/**").hasAnyRole(ADMIN, USER, AUDITH)
+                        .requestMatchers("/audith/**").hasAnyRole(ADMIN,USER, AUDITH)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -57,6 +57,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+    /*
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -71,7 +72,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**",configuration);
 
         return source;
-    }
+    }*/
 
 }
-

@@ -1,5 +1,6 @@
 package org.grupouno.parking.it4.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
@@ -18,21 +19,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-
+import java.util.Map;
 import java.util.Optional;
+
+
 @AllArgsConstructor
 @Service
 public class UserService implements IUserService {
     final UserRepository userRepository;
+
+    private final AudithService audithService; // Inyección del servicio de auditoría
     private final PasswordEncoder passwordEncoder;
     private final VerificationCodeService verificationCodeService;
     private final ProfileRepository profileRepository;
+    private final ObjectMapper objectMapper; // Para convertir a JSON
+
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
+        String responseMessage = user.map(User::toString).orElse("Not Found");
+
+        auditAction("User", "Fetching user by Email", "Read",
+                Map.of("email", email),
+                Map.of("user", responseMessage),
+                user.isPresent() ? "Success" : "Not Found");
+        return user;
     }
 
     @Override
@@ -40,18 +54,44 @@ public class UserService implements IUserService {
         if (id == null ) {
             throw new IllegalArgumentException("Id is necessary");
         }
-        return userRepository.findById(id);
+
+        Optional<User> user = userRepository.findById(id);
+        String responseMessage = user.map(User::toString).orElse("Not Found");
+
+        auditAction("User", "Fetching user by ID", "Read",
+                Map.of("id", id),
+                Map.of("user", responseMessage),
+                user.isPresent() ? "Success" : "Not Found");
+        return user;
+
+
     }
 
     @Override
     public User save(User user) {
-        return userRepository.save(user);
+        User saveUser = userRepository.save(user);
+
+        // Registro de auditoría
+        auditAction("User", "Saving user", "Create",
+                convertToMap(user),
+                convertToMap(saveUser),
+                "Success");
+        return saveUser;
+
+
     }
 
     @Override
     public Page<User> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("email")));
-        return userRepository.findAll(pageable);
+        Page<User> users = userRepository.findAll(pageable);
+
+        // Registro de auditoría
+        auditAction("User", "Fetching all users", "Read",
+                Map.of(),
+                Map.of("usersCount", users.getTotalElements()),
+                "Success");
+        return users;
     }
 
     @Override
@@ -61,6 +101,10 @@ public class UserService implements IUserService {
         }
         try {
             userRepository.deleteById(idUser);
+            auditAction("User", "Deleting user", "Delete",
+                    Map.of("userId", idUser),
+                    null,
+                    "Success");
         } catch (DataAccessException e) {
             throw new UserDeletionException("Error deleting user with ID " + idUser, e);
         }
@@ -85,6 +129,11 @@ public class UserService implements IUserService {
                 user.setIdProfile(profile);
             }
             userRepository.save(user);
+            // Registro de auditoría
+            auditAction("User", "Updating user", "Update",
+                    Map.of("userId", idUser, "userUpdates", userDto),
+                    convertToMap(user),
+                    "Success");
         }
     }
 
@@ -123,6 +172,12 @@ public class UserService implements IUserService {
             user.setIdProfile(profile);
         }
         userRepository.save(user);
+
+        // Registro de auditoría
+        auditAction("User", "Patching user", "Update",
+                Map.of("userId", idUser, "userUpdates", userDto),
+                convertToMap(user),
+                "Success");
     }
 
     @Override
@@ -137,6 +192,12 @@ public class UserService implements IUserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        // Registro de auditoría
+        auditAction("User", "update password", "Update",
+                Map.of("userId", idUser, "paswordUpdate", pastPassword),
+                convertToMap(user),
+                "Success");
     }
 
     @Override
@@ -144,6 +205,13 @@ public class UserService implements IUserService {
         User user = userRepository.findById(idUser).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        // Registro de auditoría
+        auditAction("User", "Change password", "Update",
+                Map.of("UserId", idUser, "Update Password", newPassword),
+                convertToMap(user),
+                "Success");
+
     }
 
     @Override
@@ -154,6 +222,20 @@ public class UserService implements IUserService {
     @Override
     public boolean isVerificationCodeValid(User user, String code) {
         return  verificationCodeService.isVerificationCodeValid(user.getEmail(), code);
+    }
+
+    private Map<String, Object> convertToMap(User user) {
+        try {
+            return objectMapper.convertValue(user, Map.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error converting User to Map", e);
+        }
+    }
+
+    private void auditAction(String entity, String description, String operation,
+                             Map<String, Object> request, Map<String, Object> response, String result) {
+        // Llamar al método de auditoría
+        audithService.createAudit(entity, description, operation, request, response, result);
     }
 
 }

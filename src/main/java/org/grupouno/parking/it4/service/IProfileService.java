@@ -17,5 +17,7 @@ public interface IProfileService {
 
     void updateProfile(ProfileDto profileDto, Long profileId);
 
+    void patchProfile(ProfileDto profileDto, Long profileId);
+
     void deleteProfile(Long profileId);
 }

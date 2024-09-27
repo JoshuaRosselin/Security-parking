@@ -10,12 +10,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "detail_role_profile")
-@IdClass(DetailDTO.class)
 public class DetailRoleProfile {
-    @Id
-    @Column(name = "profile_id")
-    private long idProfile;
-    @Id
-    @Column(name = "role_id")
-    private long idRole;
+
+    @EmbeddedId
+    private DetailDTO id;  // Aquí usamos la clave compuesta
+
+    @ManyToOne
+    @MapsId("idProfile")  // Mapeamos idProfile desde el embebido
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
+    private Profile profile;
+
+    @ManyToOne
+    @MapsId("idRole")  // Mapeamos idRole desde el embebido
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    private Rol role;
 }
+
