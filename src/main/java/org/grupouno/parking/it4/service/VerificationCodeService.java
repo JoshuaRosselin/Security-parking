@@ -2,26 +2,24 @@ package org.grupouno.parking.it4.service;
 
 import org.grupouno.parking.it4.dto.VerificationCodeDto;
 import org.grupouno.parking.it4.exceptions.InvalidVerificationCodeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.HashMap;
 
 @Service
 public class VerificationCodeService {
     private final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
 
+    @Autowired
     AudithService audithService;
 
     public void saveVerificationCode(String email, String code) {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
         VerificationCodeDto verificationCode = new VerificationCodeDto(code, expiry);
         verificationCodes.put(email, verificationCode);
-
         // Registrar auditoría para la creación del código de verificación
         auditAction("VerificationCode", "Saved verification code for email: " + email, "CREATE",
                 Map.of("email", email, "code", code), null, "Success");
