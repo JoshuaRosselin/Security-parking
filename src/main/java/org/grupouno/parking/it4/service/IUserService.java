@@ -22,7 +22,7 @@ public interface IUserService {
 
     void updatePassword(Long idUser, String pastPassword, String newPassword, String confirmPassword);
 
-    void changePassword(Long idUser, String newPassword);
+    void changePassword(Long idUser, String newPassword, String confirmPassword);
 
     void saveVerificationCode(User user, String code);
 

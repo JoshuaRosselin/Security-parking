@@ -203,8 +203,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void changePassword(Long idUser, String newPassword) {
+    public void changePassword(Long idUser, String newPassword, String confirmPassword) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if (!newPassword.equals(confirmPassword)) {
+            logger.error("The password not matched" );
+            throw new IllegalArgumentException("The new password and confirm password do not match");
+        }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 

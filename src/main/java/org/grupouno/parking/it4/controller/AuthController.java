@@ -56,14 +56,20 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordDto request) {
         Map<String, String> response = new HashMap<>();
-        Optional<User> user = userService.findByEmail(request.getEmail());
-        if (user.isEmpty() || !userService.isVerificationCodeValid(user.get(), request.getVerificationCode())) {
-            response.put(MESSAGE, "Code invalid");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        try{
+            Optional<User> user = userService.findByEmail(request.getEmail());
+            if (user.isEmpty() || !userService.isVerificationCodeValid(user.get(), request.getVerificationCode())) {
+                response.put(MESSAGE, "Code invalid");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+            userService.changePassword(user.get().getUserId(), request.getNewPassword(), request.getConfirmPassword());
+            response.put(MESSAGE, "Password changed");
+            return ResponseEntity.ok(response);
+        }catch (IllegalArgumentException e){
+            response.put(MESSAGE, e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
-        userService.changePassword(user.get().getUserId(), request.getNewPassword());
-        response.put(MESSAGE, "Password changed");
-        return ResponseEntity.ok(response);
+
     }
 
     @PostMapping("/signup")
