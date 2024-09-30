@@ -10,6 +10,8 @@ import org.grupouno.parking.it4.security.AuthenticationService;
 import org.grupouno.parking.it4.security.JwtService;
 import org.grupouno.parking.it4.service.MailService;
 import org.grupouno.parking.it4.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private static final String MESSAGE = "message";
     private final JwtService jwtService;
     private Validations validate = new Validations();
@@ -44,12 +47,14 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         if (user.isEmpty()) {
             response.put(MESSAGE, "Email not found");
+            logger.warn("Email not fund");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         String verificationCode = validate.generateVerificationCode();
         userService.saveVerificationCode(user.get(), verificationCode);
         emailService.sendVerificationCode(email, verificationCode);
         response.put(MESSAGE, "Email has been send");
+        logger.info("Emial send to {}", email);
         return ResponseEntity.ok(response);
     }
 
@@ -64,8 +69,10 @@ public class AuthController {
             }
             userService.changePassword(user.get().getUserId(), request.getNewPassword(), request.getConfirmPassword());
             response.put(MESSAGE, "Password changed");
+            logger.info("Password updated from {}", request.getEmail());
             return ResponseEntity.ok(response);
         }catch (IllegalArgumentException e){
+            logger.error("Faild change password");
             response.put(MESSAGE, e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
@@ -78,13 +85,16 @@ public class AuthController {
         try {
             User registeredUser = authenticationService.signup(registerUserDto);
             response.put(MESSAGE, "User add" + registeredUser);
+            logger.info("New user, email: {}, name {}{}", registerUserDto.getEmail(), registeredUser.getName(), registeredUser.getSurname());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             response.put(MESSAGE, e.getMessage());
+            logger.error("All data is required or data email or dpi is dupliced");
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.put(MESSAGE, "Error");
             response.put("err", "An error occurred while adding the user " + e.getMessage());
+            logger.error("Fail add new user");
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -96,7 +106,7 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
-
+        logger.info("New login {}", loginUserDto.getEmail());
         return ResponseEntity.ok(loginResponse);
     }
 

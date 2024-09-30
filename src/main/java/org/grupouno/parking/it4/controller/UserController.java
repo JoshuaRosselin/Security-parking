@@ -8,6 +8,8 @@ import org.grupouno.parking.it4.dto.ChangePasswordDto;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @RequestMapping("/users")
 @RestController
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
@@ -32,6 +35,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User customUserDetails = (User) authentication.getPrincipal();
         userService.updatePassword(customUserDetails.getUserId(), password.getPastPassword(), password.getNewPassword(), password.getConfirmPassword());
+        logger.info("Password changed succesfully");
         return ResponseEntity.ok("Password changed");
     }
 
@@ -42,15 +46,19 @@ public class UserController {
         try {
             userService.patchUser(userDto, idUser);
             response.put(MESSAGE, "User updated successfully");
-            return ResponseEntity.ok(response); // 200 OK
+            logger.info("User {} updated", idUser);
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             response.put(ERROR, e.getMessage());
+            logger.error("User not {} not found, {}", idUser, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (IllegalArgumentException e) {
             response.put(ERROR, "Invalid data: " + e.getMessage());
+            logger.error("Profile not found to updated, {}", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.put(ERROR, "An error occurred: " + e.getMessage());
+            logger.error("Fail patch user {}, {}", idUser, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -64,15 +72,19 @@ public class UserController {
         try {
             userService.patchUser(userDto, customUserDetails.getUserId());
             response.put(MESSAGE, "User updated successfully");
-            return ResponseEntity.ok(response); // 200 OK
+            logger.info("User updated succesfully");
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             response.put(ERROR, e.getMessage());
+            logger.error("User not found, {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Profile not found, {}", e.getMessage());
             response.put(ERROR, "Invalid data: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.put(ERROR, "An error occurred: " + e.getMessage());
+            logger.error("Faild patch user, {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -84,10 +96,12 @@ public class UserController {
         try{
             userService.updateUser(userDto, idUser);
             response.put(MESSAGE, "User Updated Successfully");
+            logger.info("User User Updated Successfully, {}", idUser);
             return ResponseEntity.ok(response);
 
         }catch(EntityNotFoundException e){
             response.put(MESSAGE, e.getMessage());
+            logger.error("User not found {}, {}",idUser,  e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -101,10 +115,12 @@ public class UserController {
         try{
             userService.updateUser(userDto, customUserDetails.getUserId());
             response.put(MESSAGE, "User Updated Successfully");
+            logger.info("User has been updated");
             return ResponseEntity.ok(response);
 
         }catch(EntityNotFoundException e){
             response.put(MESSAGE, e.getMessage());
+            logger.error("User {} not found", userDto.getName());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -117,16 +133,19 @@ public class UserController {
             Optional<User> user = userService.findById(idUser);
             if (user.isPresent()) {
                 response.put(MESSAGE, user.toString() );
+                logger.info("Get user {}", idUser);
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.notFound().build();
             }
         }catch (IllegalArgumentException e) {
             response.put(MESSAGE, e.getMessage());
+            logger.error("User not found");
             return ResponseEntity.badRequest().body(response);
         }catch (Exception e){
             response.put(MESSAGE, ERROR);
             response.put("err", "An error finding user " + e.getMessage());
+            logger.error("Fail find user {}", idUser);
             return ResponseEntity.internalServerError().body(response);
         }
 
@@ -143,10 +162,12 @@ public class UserController {
             response.put("totalPages", String.valueOf(userPage.getTotalPages()));
             response.put("currentPage", String.valueOf(userPage.getNumber()));
             response.put("totalElements", String.valueOf(userPage.getTotalElements()));
+            logger.info("Get users, pages: {}, elements: {}", page, userPage.getTotalElements());
             return ResponseEntity.ok(response);
         }catch(Exception e){
             response.put(MESSAGE, ERROR);
             response.put("err", "An error get users " + e.getMessage());
+            logger.error("Fail get users");
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -158,13 +179,16 @@ public class UserController {
         try{
             userService.delete(idUser);
             response.put(MESSAGE, "User deleted successfully");
+            logger.info("Delte user {}", idUser);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             response.put(MESSAGE, e.getMessage());
+            logger.error("User not found to  deleting");
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e){
             response.put(MESSAGE, ERROR);
             response.put("err", "An error ocurred deleting user " + e.getMessage());
+            logger.error("Error delete  users");
             return ResponseEntity.internalServerError().body(response);
         }
 
@@ -179,13 +203,16 @@ public class UserController {
         try{
             userService.delete(customUserDetails.getUserId());
             response.put(MESSAGE, "User deleted successfully");
+            logger.info("Delte user");
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             response.put(MESSAGE, e.getMessage());
+            logger.error("User not found, {}", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e){
             response.put(MESSAGE, ERROR);
             response.put("err", "An error ocurred deliting user " + e.getMessage());
+            logger.error("Error deleting user,  {}", e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
 
