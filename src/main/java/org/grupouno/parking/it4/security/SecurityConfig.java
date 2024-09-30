@@ -17,9 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true)
 public class SecurityConfig {
+    private static final String PROFILE = "PROFILE";
     private static final String USER = "USER";
-    private static final String ADMIN = "ADMIN";
     private static final String AUDITH = "AUDITH";
+    private static final String DETAILROLEPROFILE = "DETAILROLEPROFILE";
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     public SecurityConfig(
@@ -38,11 +39,11 @@ public class SecurityConfig {
                         .requestMatchers("/v3/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/users/**").hasAnyRole(ADMIN, USER, AUDITH)
-                        .requestMatchers("/details/**").hasAnyRole(ADMIN, USER, AUDITH)
-                        .requestMatchers("/profiles/**").hasAnyRole(ADMIN, USER, AUDITH)
-                        .requestMatchers("/detailsRoleProfile/**").hasAnyRole(ADMIN, USER, AUDITH)
-                        .requestMatchers("/audith/**").hasAnyRole(ADMIN, USER, AUDITH)
+                        .requestMatchers("/users/**").hasAnyRole(PROFILE, USER, AUDITH )
+                        .requestMatchers("/details/**").hasAnyRole(PROFILE, USER, AUDITH, DETAILROLEPROFILE)
+                        .requestMatchers("/profiles/**").hasAnyRole(PROFILE, USER, AUDITH, DETAILROLEPROFILE)
+                        .requestMatchers("/detailsRoleProfile/**").hasAnyRole(PROFILE, USER, AUDITH)
+                        .requestMatchers("/audith/**").hasAnyRole(PROFILE, USER, AUDITH)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -24,7 +24,7 @@ public class ProfileController {
     private final ProfileService profileService;
     private static final String ERROR = "Error:";
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> listProfiles(@RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
@@ -41,7 +41,7 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @GetMapping("/{profileId}")
     public ResponseEntity<Map<String, Object>> findProfileById(@PathVariable Long profileId) {
         Map<String, Object> response = new HashMap<>();
@@ -56,7 +56,7 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @PostMapping("/saveProfile")
     public ResponseEntity<String> saveProfile(@RequestBody Profile profile) {
         try {
@@ -68,7 +68,7 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @PutMapping("/update/{profileId}")
     public ResponseEntity<String> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
         try {
@@ -83,7 +83,7 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @DeleteMapping("delete/{profileId}")
     public ResponseEntity<String> deleteProfile(@PathVariable Long profileId) {
         try {
@@ -101,7 +101,7 @@ public class ProfileController {
         }
     }
 
-    @RolesAllowed({"ADMIN", "USER", "AUDITH"})
+    @RolesAllowed("PROFILE")
     @PatchMapping("patchProfile/{profileId}")
     public ResponseEntity<String> patchProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
         try {

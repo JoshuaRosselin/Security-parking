@@ -26,7 +26,7 @@ public class RoleController {
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
 
-    @RolesAllowed({"ADMIN","USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("")
     public ResponseEntity<Map<String, String>> getAllRoles() {
         Map<String, String> response = new HashMap<>();
@@ -43,7 +43,7 @@ public class RoleController {
         }
     }
 
-    @RolesAllowed({"ADMIN","USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, String>> getRolesId(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
@@ -60,7 +60,7 @@ public class RoleController {
         }
     }
 
-    @RolesAllowed({"ADMIN","USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @PostMapping("/saveRol")
     public ResponseEntity<Map<String, String>> addRole(@RequestBody RoleDto role) {
         Map<String, String> response = new HashMap<>();
@@ -77,7 +77,7 @@ public class RoleController {
         }
     }
 
-    @RolesAllowed({"ADMIN","USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, String>> deleteRole(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
@@ -94,8 +94,7 @@ public class RoleController {
         }
     }
 
-
-    @RolesAllowed({"ADMIN","USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateRole(@PathVariable Long id, @RequestBody RoleDto role) {
         Map<String, String> response = new HashMap<>();

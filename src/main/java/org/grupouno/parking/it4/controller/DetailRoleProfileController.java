@@ -32,7 +32,7 @@ public class DetailRoleProfileController {
         this.rolService = rolService;
     }
 
-    @RolesAllowed({"ADMIN", "USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @PostMapping("/{profileId}/{roleId}")
     public ResponseEntity<DetailRoleProfile> saveDetailRoleProfile(
             @PathVariable long profileId,
@@ -56,19 +56,21 @@ public class DetailRoleProfileController {
             return ResponseEntity.notFound().build();
         }
     }
-    @RolesAllowed({"ADMIN", "USER"})
+
+    @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("")
     public List<DetailRoleProfile> getAllDetailRoleProfiles() {
         return detailRoleProfileService.getAllDetailRoleProfiles();
     }
-    @RolesAllowed({"ADMIN", "USER"})
 
+    @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("/profile/{profileId}/roles")
     public ResponseEntity<List<Rol>> getRolesByProfileId(@PathVariable long profileId) {
         List<Rol> roles = detailRoleProfileService.getRolesByProfileId(profileId);
         return ResponseEntity.ok(roles);
     }
-    @RolesAllowed({"ADMIN", "USER"})
+
+    @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("/role/{roleId}/profiles")
     public ResponseEntity<List<Profile>> getProfilesByRoleId(@PathVariable long roleId) {
         List<Profile> profiles = detailRoleProfileService.getProfilesByRoleId(roleId);
@@ -76,7 +78,7 @@ public class DetailRoleProfileController {
     }
 
 
-    @RolesAllowed({"ADMIN", "USER"})
+    @RolesAllowed("DETAILROLEPROFILE")
     @PutMapping("/profile/{profileId}/roles")
     public ResponseEntity<Void> updateRolesForProfile(@PathVariable long profileId, @RequestBody List<Long> roleIds) {
         detailRoleProfileService.deleteRolesFromProfile(profileId);
