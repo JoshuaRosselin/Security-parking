@@ -153,15 +153,15 @@ public class UserController {
 
     @RolesAllowed("USER")
     @GetMapping("")
-    public ResponseEntity<Map<String, String>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Map<String, Object> response = new HashMap<>();
         try{
             Page<User> userPage = userService.getAllUsers(page, size);
             response.put(MESSAGE, "Users retrieved successfully");
-            response.put("users", userPage.getContent().toString());
-            response.put("totalPages", String.valueOf(userPage.getTotalPages()));
-            response.put("currentPage", String.valueOf(userPage.getNumber()));
-            response.put("totalElements", String.valueOf(userPage.getTotalElements()));
+            response.put("users", userPage.getContent());
+            response.put("totalPages", userPage.getTotalPages());
+            response.put("currentPage", userPage.getNumber());
+            response.put("totalElements", userPage.getTotalElements());
             logger.info("Get users, pages: {}, elements: {}", page, userPage.getTotalElements());
             return ResponseEntity.ok(response);
         }catch(Exception e){
