@@ -1,6 +1,5 @@
 package org.grupouno.parking.it4.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @NoArgsConstructor
