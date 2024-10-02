@@ -13,7 +13,6 @@ public class UserDto {
     private long age;
     private String dpi;
     private String email;
-    @JsonIgnore
     private String password;
     private boolean status;
     private Long profileId;

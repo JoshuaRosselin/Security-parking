@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 
 import org.grupouno.parking.it4.dto.ChangePasswordDto;
+import org.grupouno.parking.it4.dto.RegisterUserDto;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.service.UserService;
@@ -218,5 +219,25 @@ public class UserController {
 
     }
 
+    @RolesAllowed("USER")
+    @PostMapping("/signup")
+    public ResponseEntity<Map<String, String>> register(@RequestBody UserDto dto) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            User registeredUser = userService.signup(dto);
+            response.put(MESSAGE, "User add" + registeredUser);
+            logger.info("New user, email: {}, name {}{}", dto.getEmail(), registeredUser.getName(), registeredUser.getSurname());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.put(MESSAGE, e.getMessage());
+            logger.error("All data is required or data email or dpi is dupliced");
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put(MESSAGE, "Error");
+            response.put("err", "An error occurred while adding the user " + e.getMessage());
+            logger.error("Fail add new user");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
 }
