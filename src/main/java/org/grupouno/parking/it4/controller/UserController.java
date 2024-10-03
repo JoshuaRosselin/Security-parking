@@ -240,4 +240,28 @@ public class UserController {
         }
     }
 
+    @RolesAllowed("USER")
+    @GetMapping("/find/{email}")
+    public ResponseEntity<Map<String, Object>> findByEmail(@PathVariable String email){
+        Map<String, Object> response = new HashMap<>();
+        try{
+            if (email == null || email.trim().isEmpty()) {
+                response.put(MESSAGE, "Email is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            Optional<User> user = userService.findByEmail(email);
+            if (user.isPresent()) {
+                response.put(MESSAGE, "User found");
+                response.put("user", user.get());
+                logger.info("User found with email {}", email);
+            }
+            return ResponseEntity.ok(response);
+        }catch(Exception e){
+            response.put(MESSAGE, ERROR);
+            response.put("err", "An error get users " + e.getMessage());
+            logger.error("Fail find users by email");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
 }
