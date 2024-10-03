@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.ProfileDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Profile;
+import org.grupouno.parking.it4.model.Rol;
+import org.grupouno.parking.it4.repository.DetailRoleProfileRepository;
 import org.grupouno.parking.it4.repository.ProfileRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +26,11 @@ public class ProfileService implements IProfileService {
     private final ProfileRepository profileRepository;
     private final AudithService audithService;
     private final ObjectMapper objectMapper;
+    private final DetailRoleProfileRepository detailRoleProfileRepository;
+
+    public List<Rol> getRolesByProfileId(Long profileId) {
+        return detailRoleProfileRepository.findRolesByProfileId(profileId);
+    }
 
     @Override
     public Page<Profile> getAllProfiles(int page, int size) {

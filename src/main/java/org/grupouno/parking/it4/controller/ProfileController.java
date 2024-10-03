@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.ProfileDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Profile;
+import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.service.ProfileService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,7 +50,9 @@ public class ProfileController {
         try {
             Optional<Profile> profile = profileService.findById(profileId);
             return profile.map(p -> {
+                List<Rol> roles = profileService.getRolesByProfileId(profileId);
                 response.put("profile", p);
+                response.put("roles", roles);
                 return ResponseEntity.ok(response);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException e) {
@@ -117,5 +121,12 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al actualizar el perfil: " + e.getMessage());
         }
+    }
+
+    @RolesAllowed("PROFILE")
+    @GetMapping("roles/{profileId}")
+    public ResponseEntity<List<Rol>> getRolesByProfileId(@PathVariable Long profileId) {
+        List<Rol> roles = profileService.getRolesByProfileId(profileId);
+        return ResponseEntity.ok(roles);
     }
 }
