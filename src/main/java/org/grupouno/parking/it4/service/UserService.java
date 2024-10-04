@@ -14,15 +14,14 @@ import org.grupouno.parking.it4.utils.Validations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -88,8 +87,15 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Page<User> getAllUsers(int page, int size) {
+    public Page<User> getAllUsers(int page, int size, String email) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("email")));
+
+        if (email != null && !email.isEmpty()) {
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            List<User> usersList = userOpt.map(List::of).orElse(Collections.emptyList());
+            return new PageImpl<>(usersList, pageable, usersList.size());
+        }
+
         Page<User> users = userRepository.findAll(pageable);
 
         // Registro de auditoría

@@ -14,7 +14,7 @@ public interface IUserService {
 
     void delete(Long id);
 
-    Page<User> getAllUsers(int page, int size);
+    Page<User> getAllUsers(int page, int size, String email);
 
     void updateUser(UserDto userDto, Long idUser);
 
