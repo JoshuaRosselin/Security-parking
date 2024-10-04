@@ -128,12 +128,12 @@ public class UserController {
 
     @RolesAllowed("USER")
     @GetMapping("/{idUser}")
-    public ResponseEntity<Map<String, String>> findUsers(@PathVariable Long idUser) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> findUsers(@PathVariable Long idUser) {
+        Map<String, Object> response = new HashMap<>();
         try{
             Optional<User> user = userService.findById(idUser);
             if (user.isPresent()) {
-                response.put(MESSAGE, user.toString() );
+                response.put(MESSAGE, user );
                 logger.info("Get user {}", idUser);
                 return ResponseEntity.ok(response);
             } else {

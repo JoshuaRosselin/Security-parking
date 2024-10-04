@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
+import org.grupouno.parking.it4.exceptions.UserNotFoundException;
 import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.repository.ProfileRepository;
@@ -57,21 +58,28 @@ public class UserService implements IUserService {
 
     @Override
     public Optional<User> findById(Long id) {
-        if (id == null ) {
+        if (id == null) {
             logger.error("Id null");
             throw new IllegalArgumentException("Id is necessary");
         }
 
-        Optional<User> user = userRepository.findById(id);
-        String responseMessage = user.map(User::toString).orElse("Not Found");
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        // Verificar si el usuario existe
+        if (optionalUser.isEmpty()) {
+            logger.warn("User with ID: {} not found", id);
+            throw new UserNotFoundException("User with ID " + id + " not found");
+        }
+
+        User user = optionalUser.get(); // Obtener el usuario ya que sabemos que existe
+        String responseMessage = user.toString();
 
         auditAction("User", "Fetching user by ID", "Read",
                 Map.of("id", id),
                 Map.of("user", responseMessage),
-                user.isPresent() ? "Success" : "Not Found");
-        return user;
+                "Success");
 
-
+        return optionalUser;
     }
 
     @Override
