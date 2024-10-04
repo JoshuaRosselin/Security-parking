@@ -53,6 +53,10 @@ public class ProfileController {
             response.put("profile", savedProfile);
             response.put("message", "Profile and roles saved successfully");
             return ResponseEntity.ok(response);
+        }catch (RuntimeException e) {
+            response.put("message", "Error saving profile with roles");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         } catch (Exception e) {
             response.put("message", "Error saving profile with roles");
             response.put("error", e.getMessage());
