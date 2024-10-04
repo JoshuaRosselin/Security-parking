@@ -42,6 +42,63 @@ public class ProfileController {
             return ResponseEntity.internalServerError().body(Map.of("message", "Error fetching profiles"));
         }
     }
+    @RolesAllowed("PROFILE")
+    @PostMapping("/addProfileRoles")
+    public ResponseEntity<Map<String, Object>> saveProfileWithRoles(
+            @RequestBody Profile profile,
+            @RequestParam List<Long> roleIds) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Profile savedProfile = profileService.saveProfileWithRoles(profile, roleIds);
+            response.put("profile", savedProfile);
+            response.put("message", "Profile and roles saved successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Error saving profile with roles");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
+    @RolesAllowed("PROFILE")
+    @PutMapping("/update/{profileId}/roles")
+    public ResponseEntity<Map<String, Object>>updateProfileRoles(
+            @PathVariable Long profileId,
+            @RequestParam List<Long> roleIds) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Profile updatedProfile = profileService.updateProfileRoles(profileId, roleIds);
+            response.put("message", "Profile and roles saved successfully");
+            response.put("profile",updatedProfile );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Error updated profile with roles");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RolesAllowed("PROFILE")
+    @DeleteMapping("/detailProfile/{profileId}")
+    public ResponseEntity<Map<String, Object>> deleteProfileAndDetail(@PathVariable Long profileId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            profileService.deleteProfileAndDetail(profileId);
+            response.put("Message", "Profile: " + profileId + " Deleted");
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            response.put("Error", "Profile not found: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (UserDeletionException  e) {
+            response.put("Error", "Cannot delete profile. It may be referenced by another entity: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (Exception e) {
+            response.put("Error", "Unexpected error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+    }
 
     @RolesAllowed("PROFILE")
     @GetMapping("/{profileId}")
