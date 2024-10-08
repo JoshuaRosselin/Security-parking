@@ -91,12 +91,10 @@ public class UserService implements IUserService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("email")));
 
         if (email != null && !email.isEmpty()) {
-            Optional<User> userOpt = userRepository.findByEmail(email);
-            List<User> usersList = userOpt.map(List::of).orElse(Collections.emptyList());
-            return new PageImpl<>(usersList, pageable, usersList.size());
+            return userRepository.findByEmailContainingIgnoreCase(email, pageable);
         }
-
         Page<User> users = userRepository.findAll(pageable);
+
 
         // Registro de auditoría
         auditAction("User", "Fetching all users", "Read",

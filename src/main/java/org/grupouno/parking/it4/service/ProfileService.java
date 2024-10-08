@@ -39,8 +39,12 @@ public class ProfileService implements IProfileService {
     }
 
     @Override
-    public Page<Profile> getAllProfiles(int page, int size) {
+    public Page<Profile> getAllProfiles(int page, int size, String description) {
         Pageable pageable = PageRequest.of(page, size);
+
+        if (description != null && !description.isEmpty()) {
+            return profileRepository.findByDescriptionContainingIgnoreCase(description, pageable);
+        }
         Page<Profile> profiles = profileRepository.findAll(pageable);
 
         auditAction("Profile", "Fetching all profiles", "Read",

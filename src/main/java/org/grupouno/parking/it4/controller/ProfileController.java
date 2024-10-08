@@ -8,6 +8,8 @@ import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.service.ProfileService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,20 +25,27 @@ import java.util.Optional;
 @RestController
 public class ProfileController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
     private final ProfileService profileService;
     private static final String ERROR = "Error:";
 
     @RolesAllowed("PROFILE")
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> listProfiles(@RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int size) {
+                                                            @RequestParam(defaultValue = "10") int size,
+                                                            @RequestParam(required = false) String description) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Page<Profile> profilePage = profileService.getAllProfiles(page, size);
+            Page<Profile> profilePage = profileService.getAllProfiles(page, size, description);
+
             response.put("profiles", profilePage.getContent());
             response.put("totalPages", profilePage.getTotalPages());
             response.put("currentPage", profilePage.getNumber());
             response.put("totalElements", profilePage.getTotalElements());
+
+            logger.info("Profiles retrieved, pages: {}, elements: {}, filter by name: {}",
+                    profilePage.getTotalPages(), profilePage.getTotalElements(), description != null ? description : "No name filter");
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("message", "Error fetching profiles"));

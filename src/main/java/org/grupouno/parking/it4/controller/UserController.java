@@ -157,22 +157,17 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String email){
+            @RequestParam(required = false) String email) {
         Map<String, Object> response = new HashMap<>();
         try {
             Page<User> userPage = userService.getAllUsers(page, size, email);
             response.put(MESSAGE, "Users retrieved successfully");
-            if (email != null && !email.isEmpty()) {
-                response.put("users", userPage.getContent());
-                response.put("totalPages", 1);
-                response.put("currentPage", 0);
-                response.put("totalElements", userPage.getTotalElements());
-            } else {
-                response.put("users", userPage.getContent());
-                response.put("totalPages", userPage.getTotalPages());
-                response.put("currentPage", userPage.getNumber());
-                response.put("totalElements", userPage.getTotalElements());
-            }
+
+            response.put("users", userPage.getContent());
+            response.put("totalPages", userPage.getTotalPages());
+            response.put("currentPage", userPage.getNumber());
+            response.put("totalElements", userPage.getTotalElements());
+
             logger.info("Get users, pages: {}, elements: {}, filter by email: {}", page, userPage.getTotalElements(), email != null ? email : "No email filter");
             return ResponseEntity.ok(response);
         }catch(Exception e){

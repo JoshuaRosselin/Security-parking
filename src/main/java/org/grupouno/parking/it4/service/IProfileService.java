@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface IProfileService {
 
 
-    Page<Profile> getAllProfiles(int page, int size);
+    Page<Profile> getAllProfiles(int page, int size, String description);
 
     Optional<Profile> findById(Long id);
 
