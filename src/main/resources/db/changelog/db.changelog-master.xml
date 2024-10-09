@@ -85,8 +85,8 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(30)"/>
-            <column name="startTime" type="datetime"/>
-            <column name="endTime" type="datetime"/>
+            <column name="start_time" type="datetime"/>
+            <column name="end_time" type="datetime"/>
             <column name="price" type="double"/>
             <column name="status" type="boolean"/>
         </createTable>
@@ -101,8 +101,8 @@
             <column name="car" type="varchar(50)"/>
             <column name="plate" type="varchar(6)"/>
             <column name="status" type="boolean"/>
-            <column name="startDate" type="datetime"/>
-            <column name="endDate" type="datetime"/>
+            <column name="start_date" type="datetime"/>
+            <column name="end_date" type="datetime"/>
             <column name="total" type="double"/>
             <column name="parking_id" type="bigint"/>
             <column name="fare_id" type="bigint"/>
@@ -151,8 +151,8 @@
 
     <changeSet id='insert-roles' author="grupo1">
         <insert tableName="role">
-            <column name="role" value="ROLE_ADMIN"/>
-            <column name="description" value="acceso completo a todas las funciones y configuraciones"/>
+            <column name="role" value="ROLE_PROFILE"/>
+            <column name="description" value="acceso completo a todas las funciones de profile"/>
         </insert>
         <insert tableName="role">
             <column name="role" value="ROLE_USER"/>
@@ -161,6 +161,22 @@
         <insert tableName="role">
             <column name="role" value="ROLE_AUDITH"/>
             <column name="description" value="puede revisar y monitorizar las actividades realizadas dentro del sistema"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_DETAILROLEPROFILE"/>
+            <column name="description" value="Acceso a roles y detalles"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_PARKING"/>
+            <column name="description" value="Acceso a funciones de parking"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_FARE"/>
+            <column name="description" value="Acceso a funciones de fare"/>
+        </insert>
+        <insert tableName="role">
+            <column name="role" value="ROLE_REGISTER"/>
+            <column name="description" value="Acceso a funciones de Register"/>
         </insert>
     </changeSet>
 
@@ -202,6 +218,22 @@
         <insert tableName="detailRolProfile">
             <column name="profile_id" value="1"/>
             <column name="role_id" value="3"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="4"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="5"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="6"/>
+        </insert>
+        <insert tableName="detailRolProfile">
+            <column name="profile_id" value="1"/>
+            <column name="role_id" value="7"/>
         </insert>
     </changeSet>
     <changeSet id="insert-detailRolProfile2" author="grupo1">

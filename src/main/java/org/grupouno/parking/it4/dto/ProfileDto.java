@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class VerificationCodeDto {
-    private String code;
-    private LocalDateTime expiry;
+public class ProfileDto {
+
+    private  String description;
+    private boolean status;
+
 }

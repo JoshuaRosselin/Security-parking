@@ -10,11 +10,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 
 
@@ -22,6 +17,10 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true)
 public class SecurityConfig {
+    private static final String PROFILE = "PROFILE";
+    private static final String USER = "USER";
+    private static final String AUDITH = "AUDITH";
+    private static final String DETAILROLEPROFILE = "DETAILROLEPROFILE";
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     public SecurityConfig(
@@ -40,8 +39,11 @@ public class SecurityConfig {
                         .requestMatchers("/v3/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/users/**").hasAnyRole("ADMIN", "USER", "AUDITH")
-                        .requestMatchers("/roles/**").hasRole("ADMIN")
+                        .requestMatchers("/users/**").hasAnyRole(PROFILE, USER, AUDITH )
+                        .requestMatchers("/details/**").hasAnyRole(PROFILE, USER, AUDITH, DETAILROLEPROFILE)
+                        .requestMatchers("/profiles/**").hasAnyRole(PROFILE, USER, AUDITH, DETAILROLEPROFILE)
+                        .requestMatchers("/detailsRoleProfile/**").hasAnyRole(PROFILE, USER, AUDITH)
+                        .requestMatchers("/audith/**").hasAnyRole(PROFILE, USER, AUDITH)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -52,20 +54,5 @@ public class SecurityConfig {
 
         return http.build();
     }
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
-        return source;
-    }
-
 }
 

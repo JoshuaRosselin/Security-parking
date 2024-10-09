@@ -1,13 +1,18 @@
 package org.grupouno.parking.it4.model;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Embeddable;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+import java.util.Objects;
+
 @Getter
 @Setter
-public class DetailDTO {
-    private long idProfile;
-    private long idRole;
+@NoArgsConstructor
+@AllArgsConstructor
+@Embeddable
+public class DetailDTO implements Serializable {
+    private Long idProfile;
+    private Long idRole;
 }
+

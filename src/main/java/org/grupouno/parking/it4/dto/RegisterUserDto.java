@@ -16,6 +16,5 @@ public class RegisterUserDto {
     private long age;
     private String dpi;
     private String email;
-    private String password;
 
 }

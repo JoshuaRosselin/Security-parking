@@ -2,20 +2,25 @@ package org.grupouno.parking.it4.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Data
-@Getter
-@Setter
 @Table(name = "detail_role_profile")
-@IdClass(DetailDTO.class)
 public class DetailRoleProfile {
-    @Id
-    @Column(name = "profile_id")
-    private long idProfile;
-    @Id
-    @Column(name = "role_id")
-    private long idRole;
+
+    @EmbeddedId
+    private DetailDTO id;
+
+    @ManyToOne
+    @MapsId("idProfile")
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
+    private Profile profile;
+
+    @ManyToOne
+    @MapsId("idRole")
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    private Rol role;
+
+    // Constructor vacío es necesario para JPA
+    public DetailRoleProfile() {}
 }

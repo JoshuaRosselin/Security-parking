@@ -10,6 +10,8 @@ import java.util.List;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Rol, Long> {
-    @Query("SELECT r FROM Rol r WHERE r.id IN (SELECT d.idRole FROM DetailRoleProfile d WHERE d.idProfile = :profileId)")
+
+    @Query("SELECT r FROM Rol r WHERE r.id IN (SELECT d.role.id FROM DetailRoleProfile d WHERE d.profile.id = :profileId)")
     List<Rol> findRolesByProfileId(@Param("profileId") Long profileId);
+
 }
