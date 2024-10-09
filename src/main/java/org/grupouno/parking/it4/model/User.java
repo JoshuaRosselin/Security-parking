@@ -29,8 +29,6 @@ public class User implements UserDetails {
     @NotBlank(message = "[Surnema] No debe estar en blanco")
     @Size(max = 25, message = "[Surnema] tiene máximo de 25" )
     private String surname;
-    @NotBlank(message = "[age] No debe estar en blanco")
-    @Size(max = 2, message = "[age] tiene máximo de 2" )
     private long age;
     @NotNull(message = "El [dpi] no puede ser nulo")
     @NotBlank(message = "[dpi] No debe estar en blanco")
@@ -39,7 +37,6 @@ public class User implements UserDetails {
     @NotBlank(message = "[email] No debe estar en blanco")
     @Size(max = 50, message = "[email] tiene máximo de 50" )
     private String email;
-    @Size(min = 8, message = "[password] tiene minimo de 8" )
     private String password;
     private boolean status;
     @ManyToOne(fetch = FetchType.EAGER)
