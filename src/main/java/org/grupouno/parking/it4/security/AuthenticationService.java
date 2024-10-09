@@ -57,6 +57,9 @@ public class AuthenticationService {
         if (Boolean.FALSE.equals(isValid)) {
             throw new IllegalArgumentException("The password is invalid");
         }
+        if (input.getDpi() == null || input.getDpi().length() > 13) {
+            throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
         Boolean isNotRepeatData = userRepository.findByEmail(input.getEmail()).isPresent();
         Boolean isNotRepeatDPI = userRepository.findByDPI(input.getDpi()).isPresent();
         if (Boolean.TRUE.equals(isNotRepeatData) || Boolean.TRUE.equals(isNotRepeatDPI)) {
