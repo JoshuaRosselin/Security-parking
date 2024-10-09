@@ -123,6 +123,9 @@ public class UserService implements IUserService {
 
     @Override
     public void updateUser(UserDto userDto, Long idUser) {
+        if (userDto.getDpi() == null || userDto.getDpi().length() > 13) {
+            throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
         if (!userRepository.existsById(idUser)) {
             logger.error("User not exist id: {}", idUser);
             throw  new EntityNotFoundException (USER_WITH + idUser + DONT_EXIST);
@@ -152,6 +155,9 @@ public class UserService implements IUserService {
 
     @Override
     public void patchUser(UserDto userDto, Long idUser) {
+        if (userDto.getDpi() == null || userDto.getDpi().length() > 13) {
+            throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
         if (!userRepository.existsById(idUser)) {
             logger.error("User not exist with id" );
             throw new EntityNotFoundException(USER_WITH + idUser + DONT_EXIST);
@@ -251,13 +257,13 @@ public class UserService implements IUserService {
         if (input.getEmail() == null || !input.getEmail().contains("@")) {
             throw new IllegalArgumentException("Email is not valid");
         }
+        if (input.getDpi() == null || input.getDpi().length() > 13) {
+            throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
         String passwordUser = validations.generatePassword();
         Boolean isValid = validations.isValidPassword(passwordUser);
         if (Boolean.FALSE.equals(isValid)) {
             throw new IllegalArgumentException("The password is invalid");
-        }
-        if (input.getDpi() == null || input.getDpi().length() > 13) {
-            throw new IllegalArgumentException("DPI must not exceed 13 digits");
         }
         Boolean isNotRepeatData = userRepository.findByEmail(input.getEmail()).isPresent();
         Boolean isNotRepeatDPI = userRepository.findByDPI(input.getDpi()).isPresent();

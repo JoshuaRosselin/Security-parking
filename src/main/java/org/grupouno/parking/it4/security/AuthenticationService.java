@@ -52,13 +52,13 @@ public class AuthenticationService {
         if (input.getEmail() == null || !input.getEmail().contains("@")) {
             throw new IllegalArgumentException("Email is not valid");
         }
+        if (input.getDpi() == null || input.getDpi().length() > 13) {
+            throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
         String passwordUser = validations.generatePassword();
         Boolean isValid = validations.isValidPassword(passwordUser);
         if (Boolean.FALSE.equals(isValid)) {
             throw new IllegalArgumentException("The password is invalid");
-        }
-        if (input.getDpi() == null || input.getDpi().length() > 13) {
-            throw new IllegalArgumentException("DPI must not exceed 13 digits");
         }
         Boolean isNotRepeatData = userRepository.findByEmail(input.getEmail()).isPresent();
         Boolean isNotRepeatDPI = userRepository.findByDPI(input.getDpi()).isPresent();
