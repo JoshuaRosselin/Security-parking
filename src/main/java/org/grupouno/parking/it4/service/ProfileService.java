@@ -55,6 +55,18 @@ public class ProfileService implements IProfileService {
         return profiles;
     }
 
+    public List<Profile> getAllProfilesForUser() {
+
+        List<Profile> profiles = profileRepository.findAll();
+
+        auditAction("Profile", "Fetching all profiles", "Read",
+                Map.of(),
+                Map.of("profilesCount", profiles.size()),
+                "Success");
+
+        return profiles;
+    }
+
     @Override
     public Optional<Profile> findById(Long id) {
         validateId(id);

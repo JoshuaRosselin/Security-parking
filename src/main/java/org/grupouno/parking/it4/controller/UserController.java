@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.ChangePasswordDto;
 import org.grupouno.parking.it4.dto.RegisterUserDto;
 import org.grupouno.parking.it4.dto.UserDto;
+import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
+import org.grupouno.parking.it4.service.ProfileService;
 import org.grupouno.parking.it4.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +32,7 @@ public class UserController {
     private final UserService userService;
     private static final String MESSAGE = "message";
     private static final String ERROR = "Error";
+    private final ProfileService profileService;
 
     @RolesAllowed("USER")
     @PostMapping("/password")
@@ -269,4 +273,12 @@ public class UserController {
         }
     }
 
+    @RolesAllowed("USER")
+    @GetMapping("/profiles")
+    public ResponseEntity<Map<String, Object>> getAllProfiles() {
+        Map<String, Object> response = new HashMap<>();
+        List<Profile> profiles = profileService.getAllProfilesForUser();
+        response.put(MESSAGE, profiles);
+        return ResponseEntity.ok(response);
+    }
 }
