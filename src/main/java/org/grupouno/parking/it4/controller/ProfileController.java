@@ -28,6 +28,7 @@ public class ProfileController {
     private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
     private final ProfileService profileService;
     private static final String ERROR = "Error:";
+    private static final String DETAIL = "Detail:";
 
     @RolesAllowed("PROFILE")
     @GetMapping("")
@@ -78,17 +79,31 @@ public class ProfileController {
     @PutMapping("/update/{profileId}/roles")
     public ResponseEntity<Map<String, Object>>updateProfileRoles(
             @PathVariable Long profileId,
-            @RequestParam List<Long> roleIds) {
+            @RequestParam List<Long> roleIds,
+            @RequestBody(required = false) ProfileDto profileDto) {
         Map<String, Object> response = new HashMap<>();
         try {
             Profile updatedProfile = profileService.updateProfileRoles(profileId, roleIds);
+            if (profileDto != null) {
+                profileService.updateProfile(profileDto, profileId);
+            }
             response.put("message", "Profile and roles saved successfully");
             response.put("profile",updatedProfile );
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("message", "Error updated profile with roles");
+        } catch (EntityNotFoundException e) {
+            response.put("message", "Profile or roles not found");
             response.put("error", e.getMessage());
-            return ResponseEntity.status(400).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
+        } catch (IllegalArgumentException e) {
+            response.put("message", "Invalid arguments provided");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
+        } catch (Exception e) {
+            response.put("message", "Error updating profile with roles");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -177,19 +192,26 @@ public class ProfileController {
 
     @RolesAllowed("PROFILE")
     @PatchMapping("patchProfile/{profileId}")
-    public ResponseEntity<String> patchProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
+    public ResponseEntity<Map<String, Object>> patchProfile(@RequestBody ProfileDto profileDto, @PathVariable Long profileId) {
+        Map<String, Object> response = new HashMap<>();
         try {
             profileService.patchProfile(profileDto, profileId);
-            return ResponseEntity.ok("Perfil actualizado parcialmente");
+            response.put("MESSAGE", "Perfil actualizado parcialmente");
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ERROR + e.getMessage());
+            response.put(ERROR, "Perfil no encontrado");
+            response.put(DETAIL, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body("Error: Datos de perfil inválidos. " + e.getMessage());
+            response.put(ERROR, "Datos de perfil inválidos");
+            response.put(DETAIL, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al actualizar el perfil: " + e.getMessage());
+            response.put(ERROR, "Error al actualizar el perfil");
+            response.put(DETAIL, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
