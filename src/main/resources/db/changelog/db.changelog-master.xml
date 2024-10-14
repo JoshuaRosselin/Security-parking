@@ -6,9 +6,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
 
-    <changeSet id="create-table-audit" author="grupo1">
-        <createTable tableName="audit">
-            <column name="audit_id" type="bigint" autoIncrement="true">
+    <changeSet id="create-table-audith" author="grupo1">
+        <createTable tableName="audith">
+            <column name="audith_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="entity" type="varchar(50)"/>
@@ -75,7 +75,6 @@
             <column name="phone" type="varchar(8)"/>
             <column name="spaces" type="int"/>
             <column name="status" type="boolean"/>
-            <column name="user_id" type="bigint"/>
         </createTable>
     </changeSet>
 
@@ -97,8 +96,6 @@
             <column name="register_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="varchar(50)"/>
-            <column name="car" type="varchar(50)"/>
             <column name="plate" type="varchar(6)"/>
             <column name="status" type="boolean"/>
             <column name="start_date" type="datetime"/>
@@ -129,11 +126,6 @@
                                  referencedColumnNames="profile_id"
                                  referencedTableName="profile"/>
 
-        <addForeignKeyConstraint baseColumnNames="user_id"
-                                 baseTableName="parking"
-                                 constraintName="fk_parking_user"
-                                 referencedColumnNames="user_id"
-                                 referencedTableName="user"/>
 
         <addForeignKeyConstraint baseColumnNames="parking_id"
                                  baseTableName="register"
