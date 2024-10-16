@@ -1,11 +1,14 @@
 package org.grupouno.parking.it4.service;
 
+import org.grupouno.parking.it4.exceptions.CustomDataAccessException;
+import org.grupouno.parking.it4.exceptions.CustomIllegalArgumentException;
 import org.grupouno.parking.it4.model.DetailRoleProfile;
 import org.grupouno.parking.it4.model.DetailDTO;
 import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.repository.DetailRoleProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +34,10 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
     public DetailRoleProfile saveDetailRoleProfile(DetailRoleProfile detailRoleProfile) {
         try {
             return repository.save(detailRoleProfile);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar el detalle del rol y perfil", e);
+        } catch (DataAccessException e) { // Captura una excepción específica
+            throw new CustomDataAccessException("Error al guardar el detalle del rol y perfil", e);
+        } catch (IllegalArgumentException e) {
+            throw new CustomIllegalArgumentException("Argumento inválido al guardar el detalle del rol y perfil", e);
         }
     }
 
@@ -42,14 +47,14 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
         id.setIdProfile(profile.getProfileId());
         id.setIdRole(role.getId());
 
-        Optional<DetailRoleProfile> detail = repository.findById(id);
-        return detail;
+        return repository.findById(id);
+
     }
 
     @Override
     public List<DetailRoleProfile> getAllDetailRoleProfiles() {
-        List<DetailRoleProfile> details = repository.findAll();
-        return details;
+        return repository.findAll();
+
     }
 
     @Override
@@ -65,18 +70,16 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
 
     @Override
     public List<Rol> getRolesByProfileId(long profileId) {
-        List<Rol> roles = repository.findByProfile_ProfileId(profileId).stream()
+        return repository.findByProfile_ProfileId(profileId).stream()
                 .map(DetailRoleProfile::getRole)
-                .collect(Collectors.toList());
-        return roles;
+                .toList();
     }
 
     @Override
     public List<Profile> getProfilesByRoleId(long roleId) {
-        List<Profile> profiles = repository.findByRole_Id(roleId).stream()
+        return repository.findByRole_Id(roleId).stream()
                 .map(DetailRoleProfile::getProfile)
-                .collect(Collectors.toList());
-        return profiles;
+                .toList();
     }
 
     @Override
@@ -100,14 +103,4 @@ public class DetailRoleProfileService implements IDetailRoleProfileService {
         );
     }
 
-    private void logAudit(String action, Long profileId, Long roleId, List<?> items) {
-        audithService.createAudit(
-                "DetailRoleProfile",
-                action + " de detalle de rol-perfil",
-                action,
-                Map.of("profileId", profileId, "roleId", roleId),
-                Map.of("itemsCount", items.size()),
-                "SUCCESS"
-        );
-    }
 }

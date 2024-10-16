@@ -10,6 +10,8 @@ import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.repository.RoleRepository;
 import org.grupouno.parking.it4.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,11 +19,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import org.grupouno.parking.it4.service.AudithService; // Importa el servicio de auditoría
 
 @AllArgsConstructor
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
+    private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -58,7 +60,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         try {
             audithService.createAudit(entity, description, operation, request, response, result);
         } catch (Exception e) {
-            System.err.println("Error saving audit record: " + e.getMessage());
+            logger.error("Error saving audit record: {}", e.getMessage());
         }
     }
 }

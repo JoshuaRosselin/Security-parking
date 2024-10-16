@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.ProfileDto;
+import org.grupouno.parking.it4.exceptions.ProfileConversionException;
+import org.grupouno.parking.it4.exceptions.RoleExistingException;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.DetailDTO;
 import org.grupouno.parking.it4.model.DetailRoleProfile;
@@ -22,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -33,6 +34,9 @@ public class ProfileService implements IProfileService {
     private final ObjectMapper objectMapper;
     private final DetailRoleProfileRepository detailRoleProfileRepository;
     private final RoleRepository roleRepository;
+    private static final String PROFILE = "Profile";
+    private static final String SUCCES = "Success";
+    private static final String NOTEXIST = "does not exist";
 
     public List<Rol> getRolesByProfileId(Long profileId) {
         return detailRoleProfileRepository.findRolesByProfileId(profileId);
@@ -47,10 +51,10 @@ public class ProfileService implements IProfileService {
         }
         Page<Profile> profiles = profileRepository.findAll(pageable);
 
-        auditAction("Profile", "Fetching all profiles", "Read",
+        auditAction(PROFILE, "Fetching all profiles", "Read",
                 Map.of(),
                 Map.of("profilesCount", profiles.getTotalElements()),
-                "Success");
+                SUCCES);
 
         return profiles;
     }
@@ -59,10 +63,10 @@ public class ProfileService implements IProfileService {
 
         List<Profile> profiles = profileRepository.findAll();
 
-        auditAction("Profile", "Fetching all profiles", "Read",
+        auditAction(PROFILE, "Fetching all profiles", "Read",
                 Map.of(),
                 Map.of("profilesCount", profiles.size()),
-                "Success");
+                SUCCES);
 
         return profiles;
     }
@@ -74,10 +78,10 @@ public class ProfileService implements IProfileService {
         Optional<Profile> profile = profileRepository.findById(id);
         String responseMessage = profile.map(Profile::toString).orElse("Not Found");
 
-        auditAction("Profile", "Fetching profile by ID", "Read",
+        auditAction(PROFILE, "Fetching profile by ID", "Read",
                 Map.of("id", id),
                 Map.of("profile", responseMessage),
-                profile.isPresent() ? "Success" : "Not Found");
+                profile.isPresent() ? SUCCES : "Not Found");
 
         return profile;
     }
@@ -87,10 +91,10 @@ public class ProfileService implements IProfileService {
         validateProfile(profile);
         Profile savedProfile = profileRepository.save(profile);
 
-        auditAction("Profile", "Saving profile", "Create",
+        auditAction(PROFILE, "Saving profile", "Create",
                 convertToMap(profile),
                 convertToMap(savedProfile),
-                "Success");
+                SUCCES);
 
         return savedProfile;
     }
@@ -99,7 +103,7 @@ public class ProfileService implements IProfileService {
     public Profile saveProfileWithRoles(Profile profile, List<Long> roleIds) {
         Optional<Profile> existingProfile = profileRepository.findByDescription(profile.getDescription());
         if (existingProfile.isPresent()) {
-            throw new RuntimeException("Profile already exists with the name: " + profile.getDescription());
+            throw new RoleExistingException("Profile already exists with the name: " + profile.getDescription());
         }
         Profile savedProfile = profileRepository.save(profile);
 
@@ -109,7 +113,7 @@ public class ProfileService implements IProfileService {
 
             Optional<DetailRoleProfile> existingDetail = detailRoleProfileRepository.findByIdIdProfileAndIdIdRole(savedProfile.getProfileId(), roleId);
             if (existingDetail.isPresent()) {
-                throw new RuntimeException("The role with id " + roleId + " is already assigned to the profile " + savedProfile.getProfileId());
+                throw new RoleExistingException("The role with id " + roleId + " is already assigned to the profile " + savedProfile.getProfileId());
             }
             DetailDTO detailDTO = new DetailDTO(savedProfile.getProfileId(), roleId);
             DetailRoleProfile detailRoleProfile = new DetailRoleProfile();
@@ -126,15 +130,15 @@ public class ProfileService implements IProfileService {
         validateProfileDto(profileDto);
 
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new EntityNotFoundException("Profile with ID " + profileId + " does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException("Profile ID " + profileId + NOTEXIST));
 
         updateProfileFields(profile, profileDto);
         profileRepository.save(profile);
 
-        auditAction("Profile", "Updating profile", "Update",
-                Map.of("profileId", profileId, "profileUpdates", profileDto),
+        auditAction(PROFILE, "Updating profile", "Update",
+                Map.of("profile Id", profileId, "profileUpdates", profileDto),
                 convertToMap(profile),
-                "Success");
+                SUCCES);
     }
 
     @Transactional
@@ -145,15 +149,15 @@ public class ProfileService implements IProfileService {
         List<DetailRoleProfile> currentRoles = detailRoleProfileRepository.findAllByIdIdProfile(profileId);
         List<Long> currentRoleIds = currentRoles.stream()
                 .map(detail -> detail.getId().getIdRole())
-                .collect(Collectors.toList());
+                .toList();
 
         List<Long> rolesToAdd = newRoleIds.stream()
                 .filter(roleId -> !currentRoleIds.contains(roleId))
-                .collect(Collectors.toList());
+                .toList();
 
         List<Long> rolesToRemove = currentRoleIds.stream()
                 .filter(roleId -> !newRoleIds.contains(roleId))
-                .collect(Collectors.toList());
+                .toList();
 
         for (Long roleId : rolesToAdd) {
             Rol role = roleRepository.findById(roleId)
@@ -184,10 +188,10 @@ public class ProfileService implements IProfileService {
         updateProfileFields(profile, profileDto);
         profileRepository.save(profile);
 
-        auditAction("Profile", "Patching profile", "Update",
+        auditAction(PROFILE, "Patching profile", "Update",
                 Map.of("profileId", profileId, "profileUpdates", profileDto),
                 convertToMap(profile),
-                "Success");
+                SUCCES);
     }
 
     @Override
@@ -196,10 +200,10 @@ public class ProfileService implements IProfileService {
 
         try {
             profileRepository.deleteById(profileId);
-            auditAction("Profile", "Deleting profile", "Delete",
+            auditAction(PROFILE, "Deleting profile", "Delete",
                     Map.of("profileId", profileId),
                     null,
-                    "Success");
+                    SUCCES);
         } catch (DataAccessException e) {
             throw new UserDeletionException("Error deleting profile", e);
         }
@@ -252,8 +256,8 @@ public class ProfileService implements IProfileService {
     private Map<String, Object> convertToMap(Profile profile) {
         try {
             return objectMapper.convertValue(profile, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error converting Profile to Map", e);
+        } catch (RuntimeException e) {
+            throw new ProfileConversionException("Error converting Profile to Map", e);
         }
     }
 

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.UserDto;
+import org.grupouno.parking.it4.exceptions.ConverterMapException;
+import org.grupouno.parking.it4.exceptions.DpiException;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.exceptions.UserNotFoundException;
 import org.grupouno.parking.it4.model.Profile;
@@ -41,6 +43,10 @@ public class UserService implements IUserService {
 
     private static final String USER_WITH = "User with id ";
     private static final String DONT_EXIST = "Don't exist";
+    private static final String UPDATE = "Update";
+    private static final String USERID = "userId";
+    private static final String SUCCESS = "Success";
+    private static final String PROFILENOTF = "Profile not found";
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
@@ -51,7 +57,7 @@ public class UserService implements IUserService {
         auditAction("User", "Fetching user by Email", "Read",
                 Map.of("email", email),
                 Map.of("user", responseMessage),
-                user.isPresent() ? "Success" : "Not Found");
+                user.isPresent() ? SUCCESS : "Not Found");
         return user;
     }
 
@@ -76,7 +82,7 @@ public class UserService implements IUserService {
         auditAction("User", "Fetching user by ID", "Read",
                 Map.of("id", id),
                 Map.of("user", responseMessage),
-                "Success");
+                SUCCESS);
 
         return optionalUser;
     }
@@ -100,7 +106,7 @@ public class UserService implements IUserService {
         auditAction("User", "Fetching all users", "Read",
                 Map.of(),
                 Map.of("usersCount", users.getTotalElements()),
-                "Success");
+                SUCCESS);
         return users;
     }
 
@@ -113,9 +119,9 @@ public class UserService implements IUserService {
         try {
             userRepository.deleteById(idUser);
             auditAction("User", "Deleting user", "Delete",
-                    Map.of("userId", idUser),
+                    Map.of(USERID, idUser),
                     null,
-                    "Success");
+                    SUCCESS);
         } catch (DataAccessException e) {
             throw new UserDeletionException("Error deleting user with ID " + idUser, e);
         }
@@ -123,13 +129,7 @@ public class UserService implements IUserService {
 
     @Override
     public void updateUser(UserDto userDto, Long idUser) {
-        if (userDto.getDpi() == null || userDto.getDpi().length() > 13) {
-            throw new IllegalArgumentException("DPI must not exceed 13 digits");
-        }
-        if (!userRepository.existsById(idUser)) {
-            logger.error("User not exist id: {}", idUser);
-            throw  new EntityNotFoundException (USER_WITH + idUser + DONT_EXIST);
-        }
+        validateUserDto(userDto, idUser);
         Optional<User> optionalUser = userRepository.findById(idUser);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -140,18 +140,30 @@ public class UserService implements IUserService {
             if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
             if(userDto.getProfileId() > 0 ){
                 Profile profile = profileRepository.findById(userDto.getProfileId())
-                        .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+                        .orElseThrow(() -> new IllegalArgumentException(PROFILENOTF));
                 user.setIdProfile(profile);
             }
             logger.info("User {} updated",  userDto.getName());
             userRepository.save(user);
             // Registro de auditoría
-            auditAction("User", "Updating user", "Update",
-                    Map.of("userId", idUser, "userUpdates", userDto),
+            auditAction("User", "Updating user", UPDATE,
+                    Map.of(USERID, idUser, "userUpdates", userDto),
                     convertToMap(user),
-                    "Success");
+                    SUCCESS);
         }
     }
+
+    public void validateUserDto(UserDto userDto, Long idUser) {
+        if (userDto.getDpi() == null || userDto.getDpi().length() > 13) {
+            throw new DpiException("DPI can not exceed 13 digits");
+        }
+        if (!userRepository.existsById(idUser)) {
+            logger.error("User not exist id: {}", idUser);
+            throw new EntityNotFoundException(USER_WITH + idUser + DONT_EXIST);
+        }
+    }
+
+
 
     @Override
     public void patchUser(UserDto userDto, Long idUser) {
@@ -188,17 +200,17 @@ public class UserService implements IUserService {
         }
         if(userDto.getProfileId() > 0 ){
             Profile profile = profileRepository.findById(userDto.getProfileId())
-                    .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+                    .orElseThrow(() -> new IllegalArgumentException(PROFILENOTF));
             user.setIdProfile(profile);
         }
         logger.info("User {} updated", userDto.getName() );
         userRepository.save(user);
 
         // Registro de auditoría
-        auditAction("User", "Patching user", "Update",
-                Map.of("userId", idUser, "userUpdates", userDto),
+        auditAction("User", "Patching user", UPDATE,
+                Map.of(USERID, idUser, "userUpdates", userDto),
                 convertToMap(user),
-                "Success");
+                SUCCESS);
     }
 
     @Override
@@ -217,10 +229,10 @@ public class UserService implements IUserService {
         userRepository.save(user);
 
         // Registro de auditoría
-        auditAction("User", "update password", "Update",
-                Map.of("userId", idUser, "paswordUpdate", pastPassword),
+        auditAction("User", "update password", UPDATE,
+                Map.of(USERID, idUser, "paswordUpdate", pastPassword),
                 convertToMap(user),
-                "Success");
+                SUCCESS);
     }
 
     @Override
@@ -234,10 +246,10 @@ public class UserService implements IUserService {
         userRepository.save(user);
 
         // Registro de auditoría
-        auditAction("User", "Change password", "Update",
+        auditAction("User", "Change password", UPDATE,
                 Map.of("UserId", idUser, "Update Password", newPassword),
                 convertToMap(user),
-                "Success");
+                SUCCESS);
 
     }
 
@@ -279,7 +291,7 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(passwordUser));
         user.setStatus(true);
         Profile profile = profileRepository.findById(input.getProfileId())
-                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+                .orElseThrow(() -> new IllegalArgumentException(PROFILENOTF));
         user.setIdProfile(profile);
         mailService.sendPasswordAndUser(input.getEmail(), passwordUser);
         return userRepository.save(user);
@@ -293,7 +305,7 @@ public class UserService implements IUserService {
         try {
             return objectMapper.convertValue(user, Map.class);
         } catch (Exception e) {
-            throw new RuntimeException("Error converting User to Map", e);
+            throw new ConverterMapException("Error converting User to Map", e);
         }
     }
 

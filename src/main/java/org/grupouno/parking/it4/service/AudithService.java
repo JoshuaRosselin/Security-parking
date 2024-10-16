@@ -6,20 +6,16 @@ import org.grupouno.parking.it4.repository.AudithRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AudithService {
 
     private final AudithRepository audithRepository;
-
     @Autowired
     public AudithService(AudithRepository audithRepository) {
         this.audithRepository = audithRepository;
@@ -48,7 +44,7 @@ public class AudithService {
     public List<Audith> getAuditsByEntity(String entity) {
         return audithRepository.findAll().stream()
                 .filter(audit -> audit.getEntity().equalsIgnoreCase(entity))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public AudithDTO convertToDTO(Audith audit) {
@@ -67,25 +63,6 @@ public class AudithService {
         return dto;
     }
 
-    private OffsetDateTime convertToOffsetDateTime(LocalDateTime localDateTime) {
-        if (localDateTime == null) {
-            return null;
-        }
-        return localDateTime.atOffset(ZoneOffset.UTC);
-    }
 
-    public void processAudit(Audith audit) {
-        try {
-            OffsetDateTime offsetDateTime = convertToOffsetDateTime(audit.getStartDate());
-        } catch (DateTimeException e) {
-            System.err.println("Error al convertir a OffsetDateTime: " + e.getMessage());
-            throw e;
-        }
-    }
 
-    public List<AudithDTO> getAllAuditDTOs() {
-        return getAllAudits().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
 }

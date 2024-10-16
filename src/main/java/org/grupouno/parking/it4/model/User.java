@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "\"user\"")
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -41,7 +42,7 @@ public class User implements UserDetails {
     private boolean status;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
-    private Profile idProfile;
+    private transient Profile idProfile;
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;

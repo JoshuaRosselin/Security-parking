@@ -25,10 +25,12 @@ import java.util.Optional;
 @RestController
 public class ProfileController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProfileService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
     private final ProfileService profileService;
     private static final String ERROR = "Error:";
     private static final String DETAIL = "Detail:";
+    private static final String PROFILE = "profile:";
+    private static final String MESSAGE = "Message";
 
     @RolesAllowed("PROFILE")
     @GetMapping("")
@@ -49,7 +51,7 @@ public class ProfileController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "Error fetching profiles"));
+            return ResponseEntity.internalServerError().body(Map.of(MESSAGE, "Error fetching profiles"));
         }
     }
     @RolesAllowed("PROFILE")
@@ -60,15 +62,11 @@ public class ProfileController {
         Map<String, Object> response = new HashMap<>();
         try {
             Profile savedProfile = profileService.saveProfileWithRoles(profile, roleIds);
-            response.put("profile", savedProfile);
-            response.put("message", "Profile and roles saved successfully");
+            response.put(PROFILE, savedProfile);
+            response.put(MESSAGE, "Profile and roles saved successfully");
             return ResponseEntity.ok(response);
-        }catch (RuntimeException e) {
-            response.put("message", "Error saving profile with roles");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        } catch (Exception e) {
-            response.put("message", "Error saving profile with roles");
+        }catch (RuntimeException  e) {
+            response.put(MESSAGE, "Error saving profile with roles");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -87,22 +85,22 @@ public class ProfileController {
             if (profileDto != null) {
                 profileService.updateProfile(profileDto, profileId);
             }
-            response.put("message", "Profile and roles saved successfully");
-            response.put("profile",updatedProfile );
+            response.put(MESSAGE, "Profile and roles saved successfully");
+            response.put(PROFILE,updatedProfile );
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
-            response.put("message", "Profile or roles not found");
-            response.put("error", e.getMessage());
+            response.put(MESSAGE, "Profile or roles not found");
+            response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
 
         } catch (IllegalArgumentException e) {
-            response.put("message", "Invalid arguments provided");
-            response.put("error", e.getMessage());
+            response.put(MESSAGE, "Invalid arguments provided");
+            response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 
         } catch (Exception e) {
-            response.put("message", "Error updating profile with roles");
-            response.put("error", e.getMessage());
+            response.put(MESSAGE, "Error updating profile with roles");
+            response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -113,16 +111,16 @@ public class ProfileController {
         Map<String, Object> response = new HashMap<>();
         try {
             profileService.deleteProfileAndDetail(profileId);
-            response.put("Message", "Profile: " + profileId + " Deleted");
+            response.put(MESSAGE, "Profile: " + profileId + " Deleted");
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
-            response.put("Error", "Profile not found: " + e.getMessage());
+            response.put(ERROR, "Profile not found: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (UserDeletionException  e) {
-            response.put("Error", "Cannot delete profile. It may be referenced by another entity: " + e.getMessage());
+            response.put(ERROR, "Cannot delete profile. It may be referenced by another entity: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (Exception e) {
-            response.put("Error", "Unexpected error: " + e.getMessage());
+            response.put(ERROR, "Unexpected error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
@@ -139,7 +137,7 @@ public class ProfileController {
                 response.put("profile", p);
                 response.put("roles", roles);
                 return ResponseEntity.ok(response);
-            }).orElseGet(() -> ResponseEntity.notFound().build());
+            }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
@@ -150,7 +148,7 @@ public class ProfileController {
     public ResponseEntity<String> saveProfile(@RequestBody Profile profile) {
         try {
             Profile savedProfile = profileService.saveProfile(profile);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Perfil guardado con éxito");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Perfil guardado con éxito"+ savedProfile);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar el perfil: " + e.getMessage());

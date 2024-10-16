@@ -1,28 +1,32 @@
 package org.grupouno.parking.it4.service;
 
+import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.VerificationCodeDto;
 import org.grupouno.parking.it4.exceptions.InvalidVerificationCodeException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+@AllArgsConstructor
 @Service
 public class VerificationCodeService {
+    private static final Logger logger = LoggerFactory.getLogger(VerificationCodeService.class);
     private final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
+    private static final String VERIFICATIONCODE ="VerificationCode";
+    private static final String SUCCESS = "Success";
 
-    @Autowired
-    AudithService audithService;
+    private final AudithService audithService;
 
     public void saveVerificationCode(String email, String code) {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
         VerificationCodeDto verificationCode = new VerificationCodeDto(code, expiry);
         verificationCodes.put(email, verificationCode);
         // Registrar auditoría para la creación del código de verificación
-        auditAction("VerificationCode", "Saved verification code for email: " + email, "CREATE",
-                Map.of("email", email, "code", code), null, "Success");
+        auditAction(VERIFICATIONCODE, "Saved verification code for email: " + email, "CREATE",
+                Map.of("email", email, "code", code), null, SUCCESS);
     }
 
     public boolean isVerificationCodeValid(String email, String code) throws InvalidVerificationCodeException {
@@ -38,8 +42,8 @@ public class VerificationCodeService {
         }
 
         // Registrar auditoría para la validación exitosa del código
-        auditAction("VerificationCode", "Successfully validated code for email: " + email, "VALIDATE",
-                Map.of("email", email, "code", code), null, "Success");
+        auditAction(VERIFICATIONCODE, "Successfully validated code for email: " + email, "VALIDATE",
+                Map.of("email", email, "code", code), null, SUCCESS);
         return true;
     }
 
@@ -48,8 +52,8 @@ public class VerificationCodeService {
         verificationCodes.entrySet().removeIf(entry -> entry.getValue().getExpiry().isBefore(LocalDateTime.now()));
 
         // Registrar auditoría para la limpieza de códigos expirados
-        auditAction("VerificationCode", "Cleaned up expired verification codes.", "CLEAN_UP",
-                null, null, "Success");
+        auditAction(VERIFICATIONCODE, "Cleaned up expired verification codes.", "CLEAN_UP",
+                null, null, SUCCESS);
     }
 
     private void auditAction(String entity, String description, String operation,
@@ -57,8 +61,7 @@ public class VerificationCodeService {
         try {
             audithService.createAudit(entity, description, operation, request, response, result);
         } catch (Exception e) {
-            // Manejo de errores, puedes usar un logger aquí
-            System.err.println("Error saving audit record: " + e.getMessage());
+            logger.error("Error saving audit record: {}", e.getMessage(), e);
         }
     }
 }

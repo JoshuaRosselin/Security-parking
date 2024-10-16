@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.grupouno.parking.it4.dto.RoleDto;
+import org.grupouno.parking.it4.exceptions.SerializingRolException;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.Rol;
 import org.grupouno.parking.it4.repository.RoleRepository;
@@ -28,11 +29,12 @@ public class RoleService implements IRoleService {
     ObjectMapper objectMapper;
     private RoleRepository repository;
     AudithService audithService;
+    private static final String SUCCES = "Success";
 
     @Override
     public List<String> findRolesByProfileId(Long profileId) {
         List<Rol> roles = repository.findRolesByProfileId(profileId);
-        auditAction("Role", "Retrieved roles for profile ID: " + profileId, "GET", null, null, "Success");
+        auditAction("Role", "Retrieved roles for profile ID: " + profileId, "GET", null, null, SUCCES);
         return roles.stream()
                 .map(Rol::getRole)
                 .toList();
@@ -41,7 +43,7 @@ public class RoleService implements IRoleService {
     @Override
     public List<GrantedAuthority> getRolesByProfileId(Long profileId) {
         List<Rol> roles = repository.findRolesByProfileId(profileId);
-        auditAction("Role", "Retrieved roles for profile ID: " + profileId, "GET", null, null, "Success");
+        auditAction("Role", "Retrieved roles for profile ID: " + profileId, "GET", null, null, SUCCES);
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRole()))
                 .collect(Collectors.toList());
@@ -79,7 +81,7 @@ public class RoleService implements IRoleService {
         try {
             previousRoleState = objectMapper.writeValueAsString(role);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing role to JSON", e);
+            throw new SerializingRolException("Error serializing role to JSON", e);
         }
 
         if (roleDto.getRole() != null) {
@@ -92,9 +94,9 @@ public class RoleService implements IRoleService {
 
         try {
             auditAction("Role", "Updated role information", "UPDATE", convertToMap(updatedRole),
-                    objectMapper.readValue(previousRoleState, Map.class), "Success");
+                    objectMapper.readValue(previousRoleState, Map.class), SUCCES);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing previous role state to JSON", e);
+            throw new SerializingRolException("Error serializing previous role state to JSON", e);
         }
     }
 
@@ -108,7 +110,7 @@ public class RoleService implements IRoleService {
             Rol roleToDelete = repository.findById(idRole).orElseThrow(() ->
                     new EntityNotFoundException("This role doesn't exist"));
 
-            auditAction("Role", "Deleted a role", "DELETE", convertToMap(roleToDelete), null, "Success");
+            auditAction("Role", "Deleted a role", "DELETE", convertToMap(roleToDelete), null, SUCCES);
 
             repository.deleteById(idRole);
         } catch (DataAccessException e) {
@@ -123,7 +125,7 @@ public class RoleService implements IRoleService {
         }
         Optional<Rol> roleOptional = repository.findById(idRole);
         if (roleOptional.isPresent()) {
-            auditAction("Role", "Retrieved role with ID: " + idRole, "GET", null, convertToMap(roleOptional.get()), "Success");
+            auditAction("Role", "Retrieved role with ID: " + idRole, "GET", null, convertToMap(roleOptional.get()), SUCCES);
         } else {
             auditAction("Role", "Failed to retrieve role with ID: " + idRole, "GET", null, null, "Not Found");
         }
@@ -133,7 +135,7 @@ public class RoleService implements IRoleService {
     @Override
     public List<Rol> getAllRol() {
         List<Rol> roles = repository.findAll();
-        auditAction("Role", "Retrieved all roles", "GET", null, null, "Success");
+        auditAction("Role", "Retrieved all roles", "GET", null, null, SUCCES);
         return roles;
     }
 
@@ -141,7 +143,7 @@ public class RoleService implements IRoleService {
         try {
             return objectMapper.convertValue(rol, Map.class);
         } catch (Exception e) {
-            throw new RuntimeException("Error converting Rol to Map", e);
+            throw new SerializingRolException("Error converting Rol to Map", e);
         }
     }
 
@@ -150,7 +152,7 @@ public class RoleService implements IRoleService {
         try {
             audithService.createAudit(entity, description, operation, request, response, result);
         } catch (Exception e) {
-            System.err.println("Error saving audit record: " + e.getMessage());
+            logger.error("Error saving audit record: {}", e.getMessage(), e);
         }
     }
 }
