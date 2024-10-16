@@ -110,68 +110,86 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(email);
-            helper.setSubject("Your Account Credentials - ParkingIT4");
+            helper.setSubject("Tus Credenciales de Cuenta - ParkingIT4");
 
             String htmlContent = """
-        <html>
+            <!DOCTYPE html>
+            <html lang="es">
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
                     body {
                         font-family: Arial, sans-serif;
-                        background-color: #1e1e1e; 
-                        color: #f4f4f4; 
-                        padding: 20px;
+                        background-color: #F5F5F5;
+                        color: #31363F;
                         margin: 0;
+                        padding: 0;
                     }
-                    .container {
-                        background-color: #282828;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+                    .email-container {
                         max-width: 600px;
-                        margin: auto;
-                        padding: 30px;
+                        margin: 0 auto;
+                        background-color: #FFFFFF;
+                        border: 1px solid #DADADA;
+                        border-radius: 8px;
+                        overflow: hidden;
                     }
-                    h1 {
-                        color: #007BFF;
+                    .header {
+                        background-color: #76ABAE;
+                        color: #FFFFFF;
+                        padding: 20px;
                         text-align: center;
+                        font-size: 24px;
                     }
-                    .credentials {
-                        font-size: 18px;
-                        color: #ffffff;
-                    }
-                    p {
-                        color: #ffffff; 
-                        line-height: 1.6; 
+                    .content {
+                        padding: 20px;
+                        line-height: 1.6;
                     }
                     .footer {
-                        margin-top: 30px;
-                        font-size: 12px;
-                        color: #bbb; 
+                        background-color: #F5F5F5;
+                        color: #999999;
                         text-align: center;
+                        padding: 10px;
+                        font-size: 12px;
                     }
-                    .footer a {
-                        color: #007BFF;
+                    .button {
+                        display: inline-block;
+                        background-color: #76ABAE;
+                        color: #FFFFFF;
+                        padding: 10px 20px;
                         text-decoration: none;
+                        border-radius: 5px;
+                        margin-top: 20px;
                     }
-                    .footer a:hover {
-                        text-decoration: underline;
+                    .info {
+                        background-color: #DADADA;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin-top: 10px;
                     }
                 </style>
             </head>
             <body>
-                <div class="container">
-                    <h1>Your Account Credentials</h1>
-                    <p>Hello,</p>
-                    <p class="credentials">Here are your account details:</p>
-                    <p class="credentials"><strong>Email:</strong> %s</p> 
-                    <p class="credentials"><strong>Password:</strong> %s</p> 
-                    <p>Please keep this information secure. If you did not request this, please contact support.</p>
+                <div class="email-container">
+                    <div class="header">
+                        ParkingIT4 Team
+                    </div>
+                    <div class="content">
+                        <p>Hola,</p>
+                        <p>Te damos la bienvenida a ParkingIT4 Team. A continuación, encontrarás la información de inicio de sesión:</p>
+                        <div class="info">
+                            <p><strong>Correo:</strong> %s</p>
+                            <p><strong>Contraseña:</strong> %s</p>
+                        </div>
+                        <p>Puedes iniciar sesión haciendo clic en el siguiente botón:</p>
+                        <a href="http://portal-parqueo.s3-website.us-east-2.amazonaws.com/#/auth/login" class="button">Iniciar Sesión</a>
+                    </div>
                     <div class="footer">
-                        <p>Thank you,<br>ParkingIT4 Team</p>
+                        © 2024 ParkingIT4 Team. Todos los derechos reservados.
                     </div>
                 </div>
             </body>
-        </html>
+            </html>
         """;
             String formattedHtmlContent = String.format(htmlContent, email, password);
             helper.setText(formattedHtmlContent, true);
