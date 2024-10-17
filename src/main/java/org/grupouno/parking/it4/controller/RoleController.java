@@ -28,11 +28,11 @@ public class RoleController {
 
     @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("")
-    public ResponseEntity<Map<String, String>> getAllRoles() {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> getAllRoles() {
+        Map<String, Object> response = new HashMap<>();
         try{
             List<Rol> roles = roleService.getAllRol();
-            response.put(MESSAGE, roles.toString());
+            response.put(MESSAGE, roles);
             logger.info("Get all rolles");
             return ResponseEntity.ok(response);
         }catch(Exception e){
@@ -45,11 +45,11 @@ public class RoleController {
 
     @RolesAllowed("DETAILROLEPROFILE")
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, String>> getRolesId(@PathVariable Long id) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> getRolesId(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
         try{
             Optional<Rol> roles = roleService.findRolById(id);
-            response.put(MESSAGE, roles.toString());
+            response.put(MESSAGE, roles);
             logger.info("Find roles, {}", id);
             return ResponseEntity.ok(response);
         }catch(IllegalArgumentException e){

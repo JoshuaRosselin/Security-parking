@@ -50,21 +50,23 @@ public class RoleService implements IRoleService {
     }
 
     @Override
-    public Rol saveRole(RoleDto role){
-        Rol rol = new Rol();
-        String roleValue = role.getRole();
-        if (roleValue.contains("ROLE_")) {
-            rol.setRole(role.getRole().toUpperCase());
-            rol.setDescription(role.getDescription());
-        } else {
-            roleValue = "ROLE_" + roleValue;
-            rol.setRole(roleValue);
-            rol.setDescription(role.getDescription());
+    public Rol saveRole(RoleDto role) {
+        String roleValue = role.getRole().toUpperCase();
+        Optional<Rol> existingRole = repository.findByRole(roleValue);
+        if (existingRole.isPresent()) {
+            logger.info("Rol {} ya existe en la base de datos, no se guardará.", roleValue);
+            return null;
         }
-        logger.info("Rol saved {}", rol.getRole() );
+        Rol rol = new Rol();
+        if (!roleValue.contains("ROLE_")) {
+            roleValue = "ROLE_" + roleValue;
+        }
+        rol.setRole(roleValue);
+        rol.setDescription(role.getDescription());
+
+        logger.info("Rol guardado {}", rol.getRole());
         return repository.save(rol);
     }
-
 
     @Override
     public void updateRol(RoleDto roleDto, Long idRol){
