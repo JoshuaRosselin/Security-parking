@@ -22,8 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Collections;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -271,6 +270,9 @@ public class UserService implements IUserService {
         }
         if (input.getDpi() == null || input.getDpi().length() > 13) {
             throw new IllegalArgumentException("DPI must not exceed 13 digits");
+        }
+        if(!validations.isValidDpi(input.getDpi())){
+            throw new IllegalArgumentException("DPI IS NOT VALID");
         }
         String passwordUser = validations.generatePassword();
         Boolean isValid = validations.isValidPassword(passwordUser);
