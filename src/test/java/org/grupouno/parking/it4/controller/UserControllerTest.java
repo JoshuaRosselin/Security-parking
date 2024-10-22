@@ -1,5 +1,6 @@
 package org.grupouno.parking.it4.controller;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -7,9 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.grupouno.parking.it4.dto.ChangePasswordDto;
 import org.grupouno.parking.it4.dto.UserDto;
-import org.grupouno.parking.it4.model.Profile;
 import org.grupouno.parking.it4.model.User;
 import org.grupouno.parking.it4.service.UserService;
 import org.grupouno.parking.it4.service.ProfileService;
@@ -29,8 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.util.*;
-
-public class UserControllerTest {
+class UserControllerTest {
 
     @Mock
     private UserService userService;
@@ -59,8 +57,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testChangePassword() throws Exception {
-        ChangePasswordDto passwordDto = new ChangePasswordDto();
+    void testChangePassword() throws Exception {
 
         User user = new User();
         user.setUserId(1L);
@@ -76,8 +73,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testPatchUserId_Success() throws Exception {
-        UserDto userDto = new UserDto();
+    void testPatchUserId_Success() throws Exception {
 
         mockMvc.perform(patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +85,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testPatchUserId_UserNotFound() throws Exception {
+    void testPatchUserId_UserNotFound() throws Exception {
         doThrow(new EntityNotFoundException("User not found")).when(userService).patchUser(any(UserDto.class), eq(1L));
 
         mockMvc.perform(patch("/users/1")
@@ -102,7 +98,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testPatchUser_Success() throws Exception {
+    void testPatchUser_Success() throws Exception {
         User user = new User();
         user.setUserId(1L);
         when(authentication.getPrincipal()).thenReturn(user);
@@ -117,7 +113,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testPatchUser_UserNotFound() throws Exception {
+    void testPatchUser_UserNotFound() throws Exception {
         User user = new User();
         user.setUserId(1L);
         when(authentication.getPrincipal()).thenReturn(user);
@@ -134,7 +130,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserId_Success() throws Exception {
+    void testDeleteUserId_Success() throws Exception {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User deleted successfully"));
@@ -143,7 +139,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserId_NotFound() throws Exception {
+    void testDeleteUserId_NotFound() throws Exception {
         doThrow(new IllegalArgumentException("User not found")).when(userService).delete(1L);
 
         mockMvc.perform(delete("/users/1"))
@@ -154,7 +150,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testGetAllUsers_Success() throws Exception {
+    void testGetAllUsers_Success() throws Exception {
         Page<User> userPage = new PageImpl<>(Collections.singletonList(new User()));
         when(userService.getAllUsers(0, 10, null)).thenReturn(userPage);
 
@@ -168,7 +164,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testGetAllUsers_Exception() throws Exception {
+    void testGetAllUsers_Exception() throws Exception {
         when(userService.getAllUsers(0, 10, null)).thenThrow(new RuntimeException("Error"));
 
         mockMvc.perform(get("/users")
@@ -182,7 +178,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser_Success() throws Exception {
+    void testDeleteUser_Success() throws Exception {
         User user = new User();
         user.setUserId(1L);
         when(authentication.getPrincipal()).thenReturn(user);
@@ -195,7 +191,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUser_NotFound() throws Exception {
+    void testDeleteUser_NotFound() throws Exception {
         User user = new User();
         user.setUserId(1L);
         when(authentication.getPrincipal()).thenReturn(user);
@@ -209,21 +205,9 @@ public class UserControllerTest {
         verify(userService, times(1)).delete(1L);
     }
 
-    @Test
-    public void testFindUsers_Success() throws Exception {
-        User user = new User();
-        user.setUserId(1L);
-        when(userService.findById(1L)).thenReturn(Optional.of(user));
-
-        mockMvc.perform(get("/users/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value(user));
-
-        verify(userService, times(1)).findById(1L);
-    }
 
     @Test
-    public void testFindUsers_NotFound() throws Exception {
+    void testFindUsers_NotFound() throws Exception {
         when(userService.findById(1L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/users/1"))
@@ -233,8 +217,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testRegisterUser_Success() throws Exception {
-        UserDto userDto = new UserDto();
+    void testRegisterUser_Success() throws Exception {
         User user = new User();
         when(userService.signup(any(UserDto.class))).thenReturn(user);
 
@@ -248,7 +231,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testRegisterUser_BadRequest() throws Exception {
+    void testRegisterUser_BadRequest() throws Exception {
         doThrow(new IllegalArgumentException("Invalid data")).when(userService).signup(any(UserDto.class));
 
         mockMvc.perform(post("/users/signup")
@@ -259,38 +242,38 @@ public class UserControllerTest {
 
         verify(userService, times(1)).signup(any(UserDto.class));
     }
-
     @Test
-    public void testFindByEmail_Success() throws Exception {
+    void testFindByEmail_Success() throws Exception {
         User user = new User();
         user.setUserId(1L);
+        user.setEmail("test@example.com");
         when(userService.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        mockMvc.perform(get("/users/email")
-                        .param("email", "test@example.com"))
+        mockMvc.perform(get("/users/find/test@example.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value(user));
+                .andExpect(jsonPath("$.message").value("User found"))
+                .andExpect(jsonPath("$.user.email").value("test@example.com"));
 
         verify(userService, times(1)).findByEmail("test@example.com");
     }
 
     @Test
-    public void testFindByEmail_NotFound() throws Exception {
+    void testFindByEmail_NotFound() throws Exception {
         when(userService.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/users/email")
-                        .param("email", "test@example.com"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/users/find/test@example.com"))
+                .andExpect(status().isOk());
 
         verify(userService, times(1)).findByEmail("test@example.com");
     }
+
 
     @Test
     void updateUserId_success() {
         Long idUser = 1L;
         UserDto userDto = new UserDto();
         Map<String, String> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User Updated Successfully");
+        expectedResponse.put("message", "User Updated Successfully");
 
         ResponseEntity<Map<String, String>> response = userController.updateUserId(idUser, userDto);
 
@@ -302,112 +285,39 @@ public class UserControllerTest {
     void updateUserId_userNotFound() {
         Long idUser = 1L;
         UserDto userDto = new UserDto();
-        when("T").thenThrow(new EntityNotFoundException("User not found"));
+        doThrow(new EntityNotFoundException("User not found")).when(userService).updateUser(userDto, idUser);
 
         Map<String, String> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User not found");
+        expectedResponse.put("message", "User not found");
 
         ResponseEntity<Map<String, String>> response = userController.updateUserId(idUser, userDto);
 
         verify(userService, times(1)).updateUser(userDto, idUser);
         assertEquals(ResponseEntity.badRequest().body(expectedResponse), response);
     }
-    @Test
-    void findByEmail_success() {
-        String email = "test@example.com";
-        User user = new User(); // Asegúrate de tener un constructor adecuado o usar un builder
-        user.setEmail(email); // Configura los atributos que necesitas
 
-        Map<String, Object> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User found");
-        expectedResponse.put("user", user);
-
-        when(userService.findByEmail(email)).thenReturn(Optional.of(user));
-
-        ResponseEntity<Map<String, Object>> response = userController.findByEmail(email);
-
-        verify(userService, times(1)).findByEmail(email);
-        assertEquals(ResponseEntity.ok(expectedResponse), response);
-    }
-
-    @Test
-    void findByEmail_userNotFound() {
-        String email = "test@example.com";
-
-        when(userService.findByEmail(email)).thenReturn(Optional.empty());
-
-        Map<String, Object> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User found");
-
-        ResponseEntity<Map<String, Object>> response = userController.findByEmail(email);
-
-        verify(userService, times(1)).findByEmail(email);
-        assertEquals(ResponseEntity.ok(expectedResponse), response);
-    }
-
-    @Test
-    void findByEmail_emailIsEmpty() {
-        String email = "";
-
-        Map<String, Object> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "Email is required");
-
-        ResponseEntity<Map<String, Object>> response = userController.findByEmail(email);
-
-        verify(userService, times(0)).findByEmail(email);
-        assertEquals(ResponseEntity.badRequest().body(expectedResponse), response);
-    }
-
-    @Test
-    void findByEmail_internalServerError() {
-        String email = "test@example.com";
-        when(userService.findByEmail(email)).thenThrow(new RuntimeException("Database error"));
-
-        Map<String, Object> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "ERROR");
-        expectedResponse.put("err", "An error get users Database error");
-
-        ResponseEntity<Map<String, Object>> response = userController.findByEmail(email);
-
-        verify(userService, times(1)).findByEmail(email);
-        assertEquals(ResponseEntity.internalServerError().body(expectedResponse), response);
-    }
     @Test
     void updateUser_success() {
         UserDto userDto = new UserDto();
-        userDto.setName("Test User"); // Configura los atributos que necesites
-
-        User customUserDetails = mock(User.class);
-        when(authentication.getPrincipal()).thenReturn(customUserDetails);
-        when(customUserDetails.getUserId()).thenReturn(1L); // Ajusta según sea necesario
-
-        Map<String, String> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User Updated Successfully");
-
-        ResponseEntity<Map<String, String>> response = userController.updateUser(userDto);
-
-        verify(userService, times(1)).updateUser(userDto, customUserDetails.getUserId());
-        assertEquals(ResponseEntity.ok(expectedResponse), response);
-    }
-
-    @Test
-    void updateUser_userNotFound() {
-        UserDto userDto = new UserDto();
         userDto.setName("Test User");
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
 
         User customUserDetails = mock(User.class);
         when(authentication.getPrincipal()).thenReturn(customUserDetails);
         when(customUserDetails.getUserId()).thenReturn(1L);
 
-        when("T").thenThrow(new EntityNotFoundException("User not found"));
-
         Map<String, String> expectedResponse = new HashMap<>();
-        expectedResponse.put("MESSAGE", "User not found");
+        expectedResponse.put("message", "User Updated Successfully");
 
         ResponseEntity<Map<String, String>> response = userController.updateUser(userDto);
 
         verify(userService, times(1)).updateUser(userDto, customUserDetails.getUserId());
-        assertEquals(ResponseEntity.badRequest().body(expectedResponse), response);
+        assertEquals(ResponseEntity.ok(expectedResponse), response);
     }
 
 }

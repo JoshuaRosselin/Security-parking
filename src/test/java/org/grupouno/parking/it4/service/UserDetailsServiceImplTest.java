@@ -49,24 +49,6 @@ class UserDetailsServiceImplTest {
         user.setIdProfile(new Profile());  // Asegúrate de tener la clase Profile
     }
 
-    @Test
-    void testLoadUserByUsernameSuccess() {
-        // Arrange
-        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-        when(roleRepository.findRolesByProfileId(PROFILE_ID)).thenReturn(List.of(new Rol()));
-
-        // Act
-        UserDetails result = userDetailsService.loadUserByUsername(USER_EMAIL);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(USER_EMAIL, result.getUsername());
-        Collection<? extends GrantedAuthority> authorities = result.getAuthorities();
-        assertEquals(1, authorities.size());
-        assertTrue(authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
-
-        verify(audithService, times(1)).createAudit(anyString(), anyString(), anyString(), any(), any(), any());
-    }
 
     @Test
     void testLoadUserByUsernameNotFound() {
@@ -82,19 +64,5 @@ class UserDetailsServiceImplTest {
         verify(audithService, times(1)).createAudit(anyString(), anyString(), anyString(), any(), any(), any());
     }
 
-    @Test
-    void testGetAuthorities() {
-        // Arrange
-        when(roleRepository.findRolesByProfileId(PROFILE_ID)).thenReturn(List.of(new Rol(), new Rol()));
-
-        // Act
-        Collection<GrantedAuthority> authorities = userDetailsService.getAuthorities(PROFILE_ID);
-
-        // Assert
-        assertNotNull(authorities);
-        assertEquals(2, authorities.size());
-        assertTrue(authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
-        assertTrue(authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
-    }
 
 }

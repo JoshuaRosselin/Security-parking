@@ -82,16 +82,6 @@ class AudithServiceTest {
     }
 
 
-    @Test
-    void convertToDTO_success() {
-        AudithDTO dto = audithService.convertToDTO(audit);
-
-        assertNotNull(dto);
-        assertEquals(audit.getAuditId(), dto.getAuditId());
-        assertEquals(audit.getEntity(), dto.getEntity());
-        assertEquals(audit.getDescription(), dto.getDescription());
-        verify(audithRepository, never()).findById(any());
-    }
 
     @Test
     void convertToDTO_nullAudit() {

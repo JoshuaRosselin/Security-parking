@@ -269,7 +269,7 @@ public class UserService implements IUserService {
         if (input.getDpi() == null || input.getDpi().length() > 13) {
             throw new IllegalArgumentException("DPI must not exceed 13 digits");
         }
-        if(!validations.isValidDpi(input.getDpi())){
+        if (!Validations.isValidDpi(input.getDpi())) {
             throw new IllegalArgumentException("DPI IS NOT VALID");
         }
         String passwordUser = validations.generatePassword();

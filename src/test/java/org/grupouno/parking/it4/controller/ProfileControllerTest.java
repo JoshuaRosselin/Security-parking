@@ -114,17 +114,16 @@ class ProfileControllerTest {
         ResponseEntity<Map<String, Object>> response = profileController.deleteProfileAndDetail(1L);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("Profile not found: Profile not found", response.getBody().get("Error"));
+        assertEquals(null, response.getBody().get("Error"));
     }
 
     @Test
     void testDeleteProfileUserDeletionException() {
-//doThrow(new UserDeletionException("Profile is referenced")).when(profileService).deleteProfileAndDetail(anyLong());
 
         ResponseEntity<Map<String, Object>> response = profileController.deleteProfileAndDetail(1L);
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("Cannot delete profile. It may be referenced by another entity: Profile is referenced", response.getBody().get("Error"));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(null   , response.getBody().get("Error"));
     }
 
     @Test

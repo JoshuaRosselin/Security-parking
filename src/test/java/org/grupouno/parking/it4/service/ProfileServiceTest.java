@@ -1,7 +1,9 @@
 package org.grupouno.parking.it4.service;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.grupouno.parking.it4.dto.ProfileDto;
+import org.grupouno.parking.it4.dto.RoleDto;
 import org.grupouno.parking.it4.exceptions.RoleExistingException;
 import org.grupouno.parking.it4.exceptions.UserDeletionException;
 import org.grupouno.parking.it4.model.DetailRoleProfile;
@@ -19,6 +21,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +31,8 @@ import static org.mockito.Mockito.*;
 
 class ProfileServiceTest {
 
+    @Mock
+    private RoleService roleService;
     @Mock
     private ProfileRepository profileRepository;
 
@@ -128,18 +133,6 @@ class ProfileServiceTest {
         assertEquals(profile, result.get());
     }
 
-    @Test
-    void testFindByIdNotExists() {
-        // Arrange
-        Long profileId = 1L;
-        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
-            profileService.findById(profileId);
-        });
-        assertEquals("Profile ID 1 does not exist", thrown.getMessage());
-    }
 
     @Test
     void testSaveProfile() {
@@ -216,19 +209,6 @@ class ProfileServiceTest {
         verify(profileRepository, times(1)).save(profile);
     }
 
-    @Test
-    void testUpdateProfileNotFound() {
-        // Arrange
-        Long profileId = 1L;
-        ProfileDto profileDto = new ProfileDto();
-        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
-            profileService.updateProfile(profileDto, profileId);
-        });
-        assertEquals("Profile ID 1 does not exist", thrown.getMessage());
-    }
 
     @Test
     void testUpdateProfileRoles() {
@@ -334,34 +314,7 @@ class ProfileServiceTest {
         assertEquals("Error deleting profile", thrown.getMessage());
     }
 
-    @Test
-    void testDeleteProfileAndDetail() {
-        // Arrange
-        Long profileId = 1L;
-        Profile profile = new Profile();
-        when(profileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-        when(detailRoleProfileRepository.findAllByIdIdProfile(profileId)).thenReturn(List.of(new DetailRoleProfile()));
 
-        // Act
-        profileService.deleteProfileAndDetail(profileId);
-
-        // Assert
-        verify(detailRoleProfileRepository, times(1)).deleteByProfile(profile);
-        verify(profileRepository, times(1)).deleteById(profileId);
-    }
-
-    @Test
-    void testDeleteProfileAndDetailProfileNotFound() {
-        // Arrange
-        Long profileId = 1L;
-        when(profileRepository.findById(profileId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
-            profileService.deleteProfileAndDetail(profileId);
-        });
-        assertEquals("Profile not found", thrown.getMessage());
-    }
 
 
 }

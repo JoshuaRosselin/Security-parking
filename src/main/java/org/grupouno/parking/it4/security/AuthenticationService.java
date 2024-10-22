@@ -28,7 +28,7 @@ public class AuthenticationService {
     private final RoleService roleService;
     private final AuthenticationManager authenticationManager;
     private final ProfileRepository profileRepository;
-    private Validations validations = new Validations();
+    private final Validations validations = new Validations();
     private final MailService mailService;
 
 
@@ -55,7 +55,7 @@ public class AuthenticationService {
         if (input.getDpi() == null || input.getDpi().length() > 13) {
             throw new IllegalArgumentException("DPI must not exceed 13 digits");
         }
-        if(!validations.isValidDpi(input.getDpi())){
+        if (!Validations.isValidDpi(input.getDpi())) {
             throw new IllegalArgumentException("DPI IS NOT VALID");
         }
         String passwordUser = validations.generatePassword();

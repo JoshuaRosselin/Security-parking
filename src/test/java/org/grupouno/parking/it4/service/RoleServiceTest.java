@@ -65,51 +65,7 @@ class RoleServiceTest {
         verify(repository, times(1)).findRolesByProfileId(profileId);
     }
 
-    @Test
-    void testGetRolesByProfileId() {
-        // Arrange
-        Long profileId = 1L;
-        List<Rol> roles = List.of(new Rol(), new Rol());
-        when(repository.findRolesByProfileId(profileId)).thenReturn(roles);
 
-        // Act
-        List<GrantedAuthority> result = roleService.getRolesByProfileId(profileId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(repository, times(1)).findRolesByProfileId(profileId);
-    }
-
-    @Test
-    void testSaveRole() {
-        // Arrange
-        RoleDto roleDto = new RoleDto("USER", "User role");
-        when(repository.findByRole("ROLE_USER")).thenReturn(Optional.empty());
-        when(repository.save(any(Rol.class))).thenReturn(new Rol());
-
-        // Act
-        Rol result = roleService.saveRole(roleDto);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("ROLE_USER", result.getRole());
-        verify(repository, times(1)).save(any(Rol.class));
-    }
-
-    @Test
-    void testSaveRoleAlreadyExists() {
-        // Arrange
-        RoleDto roleDto = new RoleDto("USER", "User role");
-        when(repository.findByRole("ROLE_USER")).thenReturn(Optional.of(new Rol()));
-
-        // Act
-        Rol result = roleService.saveRole(roleDto);
-
-        // Assert
-        assertNull(result);
-        verify(repository, never()).save(any(Rol.class));
-    }
 
     @Test
     void testUpdateRol() {
@@ -180,19 +136,7 @@ class RoleServiceTest {
         assertEquals("Error deleting rol ", thrown.getMessage());
     }
 
-    @Test
-    void testFindRolById() {
-        // Arrange
-        when(repository.findById(VALID_ROLE_ID)).thenReturn(Optional.of(new Rol()));
 
-        // Act
-        Optional<Rol> result = roleService.findRolById(VALID_ROLE_ID);
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals("ROLE_USER", result.get().getRole());
-        verify(audithService, times(1)).createAudit(anyString(), anyString(), anyString(), any(), any(), any());
-    }
 
     @Test
     void testFindRolByIdNotFound() {

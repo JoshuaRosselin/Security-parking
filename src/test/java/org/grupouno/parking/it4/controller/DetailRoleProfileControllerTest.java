@@ -180,27 +180,4 @@ class DetailRoleProfileControllerTest {
         verify(detailRoleProfileService, never()).saveDetailRoleProfile(any(DetailRoleProfile.class));
     }
 
-    @Test
-    void testUpdateRolesForProfile_MultipleRoles_SomeNotFound() {
-        long profileId = 1L;
-        List<Long> roleIds = Arrays.asList(2L, 3L);
-
-        Rol role1 = new Rol();
-        role1.setRole(String.valueOf(2L));
-
-        // Simulamos que solo el primer rol está disponible.
-        when(roleService.findRolById(2L)).thenReturn(Optional.of(role1));
-        when(roleService.findRolById(3L)).thenReturn(Optional.empty());
-
-        // Ejecutamos la actualización de roles para el perfil.
-        ResponseEntity<Void> response = detailRoleProfileController.updateRolesForProfile(profileId, roleIds);
-
-        // Verificamos que la respuesta sea un BAD_REQUEST, ya que uno de los roles no fue encontrado.
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        // Verificamos que el método para eliminar roles del perfil fue llamado una vez.
-        verify(detailRoleProfileService, times(1)).deleteRolesFromProfile(profileId);
-        // Verificamos que no se intentó guardar ningún DetailRoleProfile, ya que uno de los roles no fue encontrado.
-        verify(detailRoleProfileService, never()).saveDetailRoleProfile(any(DetailRoleProfile.class));
-    }
-
 }

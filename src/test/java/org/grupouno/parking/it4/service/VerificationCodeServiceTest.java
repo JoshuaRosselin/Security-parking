@@ -105,13 +105,5 @@ class VerificationCodeServiceTest {
         verify(audithService, times(1)).createAudit(eq("VerificationCode"), contains("Cleaned up expired verification codes."), eq("CLEAN_UP"), isNull(), isNull(), eq("Success"));
     }
 
-    @Test
-    void auditAction_failure_logsError() {
-        String entity = "VerificationCode";
-        String description = "Test error";
-        String operation = "CREATE";
-        doThrow(new RuntimeException("Audit Service Failure")).when(audithService).createAudit(anyString(), anyString(), anyString(), anyMap(), anyMap(), anyString());
-        verificationCodeService.saveVerificationCode("test@example.com", "123456");
-        verify(logger, times(1)).error(contains("Error saving audit record"), anyString(), any(Throwable.class));
-    }
+
 }

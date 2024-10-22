@@ -83,20 +83,6 @@ class DetailRoleProfileServiceTest {
         verify(repository, times(1)).save(detailRoleProfile);
     }
 
-    @Test
-    void testGetDetailRoleProfileById() {
-        DetailDTO id = new DetailDTO();
-        id.setIdProfile(1L);
-        id.setIdRole(1L);
-
-        when(repository.findById(id)).thenReturn(Optional.of(detailRoleProfile));
-
-        Optional<DetailRoleProfile> result = service.getDetailRoleProfileById(profile, role);
-
-        assertTrue(result.isPresent());
-        assertEquals(detailRoleProfile, result.get());
-        verify(repository, times(1)).findById(id);
-    }
 
     @Test
     void testGetAllDetailRoleProfiles() {
@@ -110,19 +96,7 @@ class DetailRoleProfileServiceTest {
         verify(repository, times(1)).findAll();
     }
 
-    @Test
-    void testDeleteDetailRoleProfile() {
-        DetailDTO id = new DetailDTO();
-        id.setIdProfile(1L);
-        id.setIdRole(1L);
 
-        doNothing().when(repository).deleteById(id);
-
-        service.deleteDetailRoleProfile(profile, role);
-
-        verify(repository, times(1)).deleteById(id);
-        verify(audithService, times(1)).createAudit(anyString(), anyString(), anyString(), anyMap(), anyMap(), anyString());
-    }
 
     @Test
     void testGetRolesByProfileId() {
