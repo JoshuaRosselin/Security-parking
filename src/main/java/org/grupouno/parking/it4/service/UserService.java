@@ -22,8 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Collections;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -205,8 +204,6 @@ public class UserService implements IUserService {
         }
         logger.info("User {} updated", userDto.getName() );
         userRepository.save(user);
-
-        // Registro de auditoría
         auditAction("User", "Patching user", UPDATE,
                 Map.of(USERID, idUser, "userUpdates", userDto),
                 convertToMap(user),
@@ -272,6 +269,9 @@ public class UserService implements IUserService {
         if (input.getDpi() == null || input.getDpi().length() > 13) {
             throw new IllegalArgumentException("DPI must not exceed 13 digits");
         }
+        if(!validations.isValidDpi(input.getDpi())){
+            throw new IllegalArgumentException("DPI IS NOT VALID");
+        }
         String passwordUser = validations.generatePassword();
         Boolean isValid = validations.isValidPassword(passwordUser);
         if (Boolean.FALSE.equals(isValid)) {
@@ -309,8 +309,7 @@ public class UserService implements IUserService {
         }
     }
 
-    private void auditAction(String entity, String description, String operation,
-                             Map<String, Object> request, Map<String, Object> response, String result) {
+    private void auditAction(String entity, String description, String operation, Map<String, Object> request, Map<String, Object> response, String result) {
         audithService.createAudit(entity, description, operation, request, response, result);
     }
 

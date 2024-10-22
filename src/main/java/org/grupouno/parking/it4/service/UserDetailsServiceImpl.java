@@ -34,11 +34,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         try {
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException("No se encontró el email: " + userEmail));
-
             Collection<GrantedAuthority> authorities = getAuthorities(user.getIdProfile().getProfileId());
             user.setAuthorities(authorities);
-
-            // Registro de auditoría para el éxito en la carga de usuario
             auditAction("User", "Successfully loaded user by email: " + userEmail, "LOAD_USER", null, null, "Success");
 
             return user;
@@ -48,15 +45,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
     }
 
-    private Collection<GrantedAuthority> getAuthorities(long profileId) {
+    public Collection<GrantedAuthority> getAuthorities(long profileId) {
         List<Rol> roles = roleRepository.findRolesByProfileId(profileId);
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRole()))
                 .collect(Collectors.toList());
     }
 
-    private void auditAction(String entity, String description, String operation,
-                             Map<String, Object> request, Map<String, Object> response, String result) {
+    private void auditAction(String entity, String description, String operation, Map<String, Object> request, Map<String, Object> response, String result) {
         try {
             audithService.createAudit(entity, description, operation, request, response, result);
         } catch (Exception e) {

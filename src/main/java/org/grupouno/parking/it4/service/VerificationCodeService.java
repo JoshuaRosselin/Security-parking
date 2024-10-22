@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 @AllArgsConstructor
 @Service
 public class VerificationCodeService {
     private static final Logger logger = LoggerFactory.getLogger(VerificationCodeService.class);
-    private final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
+    public final Map<String, VerificationCodeDto> verificationCodes = new ConcurrentHashMap<>();
     private static final String VERIFICATIONCODE ="VerificationCode";
     private static final String SUCCESS = "Success";
 
@@ -24,7 +25,6 @@ public class VerificationCodeService {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
         VerificationCodeDto verificationCode = new VerificationCodeDto(code, expiry);
         verificationCodes.put(email, verificationCode);
-        // Registrar auditoría para la creación del código de verificación
         auditAction(VERIFICATIONCODE, "Saved verification code for email: " + email, "CREATE",
                 Map.of("email", email, "code", code), null, SUCCESS);
     }
@@ -41,7 +41,6 @@ public class VerificationCodeService {
             throw new InvalidVerificationCodeException("The code has expired.");
         }
 
-        // Registrar auditoría para la validación exitosa del código
         auditAction(VERIFICATIONCODE, "Successfully validated code for email: " + email, "VALIDATE",
                 Map.of("email", email, "code", code), null, SUCCESS);
         return true;
@@ -51,7 +50,6 @@ public class VerificationCodeService {
     public void cleanExpiredCodes() {
         verificationCodes.entrySet().removeIf(entry -> entry.getValue().getExpiry().isBefore(LocalDateTime.now()));
 
-        // Registrar auditoría para la limpieza de códigos expirados
         auditAction(VERIFICATIONCODE, "Cleaned up expired verification codes.", "CLEAN_UP",
                 null, null, SUCCESS);
     }
