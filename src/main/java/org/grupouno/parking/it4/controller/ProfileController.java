@@ -213,6 +213,8 @@ public class ProfileController {
         }
     }
 
+
+
     @RolesAllowed("PROFILE")
     @GetMapping("roles/{profileId}")
     public ResponseEntity<List<Rol>> getRolesByProfileId(@PathVariable Long profileId) {

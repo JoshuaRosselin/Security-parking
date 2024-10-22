@@ -204,8 +204,6 @@ public class UserService implements IUserService {
         }
         logger.info("User {} updated", userDto.getName() );
         userRepository.save(user);
-
-        // Registro de auditoría
         auditAction("User", "Patching user", UPDATE,
                 Map.of(USERID, idUser, "userUpdates", userDto),
                 convertToMap(user),
@@ -311,8 +309,7 @@ public class UserService implements IUserService {
         }
     }
 
-    private void auditAction(String entity, String description, String operation,
-                             Map<String, Object> request, Map<String, Object> response, String result) {
+    private void auditAction(String entity, String description, String operation, Map<String, Object> request, Map<String, Object> response, String result) {
         audithService.createAudit(entity, description, operation, request, response, result);
     }
 
